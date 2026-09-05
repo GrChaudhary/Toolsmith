@@ -107,6 +107,118 @@ unpinned network capture. Unsafe, unavailable, changed, or unsupported content
 fails closed with a brand diagnostic. Omitted `brand` preserves the prior
 output.
 
+## Enterprise `kind` taxonomy (architecture, pilot)
+
+Architecture `components[]` accept an optional `kind`, scoped for now to three
+pilot values: `queue`, `cache`, `identity-provider`. This is the beginning of
+a broader enterprise semantic taxonomy layered on top of — not instead of —
+the existing `componentType` (`type`). The two fields answer different
+questions and both remain independently optional:
+
+- `type` (`componentType`) is the legacy, renderer-facing classification that
+  drives color/legend/icon. It is unchanged and required exactly as before.
+- `kind` is a finer-grained semantic label that does not affect rendering in
+  this phase. It exists so an architecture description can say a component
+  is specifically a queue, a cache, or an identity provider, independent of
+  which broader `type` bucket the renderer groups it under.
+
+A document that omits `kind` entirely is unaffected — `kind` is optional at
+every level and adds no new required fields. The conventional pairing is:
+
+| `kind` | conventionally paired `type` |
+|---|---|
+| `queue` | `messagebus` |
+| `cache` | `database` |
+| `identity-provider` | `security` |
+
+This pairing is documentation, not a validation rule: schema validation never
+checks it, and any schema-valid `type` may be combined with any pilot `kind`.
+The informational `archify review architecture` command (see the repository
+root's CLI usage) checks this pairing and reports pass/warning findings; it
+never fails `validate` or `deliver`. See `archify/review/architecture-review.mjs`.
+
+`kind` is scoped to `architecture.schema.json` only. The other four diagram
+schemas are unchanged in this phase.
+
+### Enterprise metadata (architecture, pilot)
+
+Architecture `components[]` also accept four independent, optional metadata
+objects, each `additionalProperties: false` and `minProperties: 1` (an
+authored empty object is rejected — omit the field entirely instead):
+
+| Field | Shape | Answers |
+|---|---|---|
+| `technology` | `{ name?, vendor? }` | which concrete technology this component runs, e.g. `{ "name": "Redis" }` |
+| `security` | `{ auth_method? }` | how this component authenticates, e.g. `{ "auth_method": "OAuth2.0" }` |
+| `ownership` | `{ team?, status?: "active"\|"deprecated"\|"planned" }` | who owns this component and its lifecycle stage |
+| `deployment` | `{ provider? }` | which infrastructure provider hosts this component |
+
+These fields are purely informational: no renderer reads them, so an
+otherwise-identical document renders byte-identical HTML whether or not they
+are present. They are independent of `kind` and `type` and of each other;
+any combination, including none, is valid.
+
+`ownership.team` is unrelated to the existing `tag` field that
+`engineering_profile: "deployment-ownership"` already reads as an owner
+name — both remain valid, independently, and neither is derived from the
+other in this phase.
+
+Like `kind`, these fields are scoped to `architecture.schema.json` only.
+
+### Component hierarchy and HLD / LLD projection (architecture, pilot)
+
+Architecture `components[]` also accept an optional `children`: a non-empty
+array of other component ids in the same document that this component
+groups. This is the one and only new fact Phase 3 adds — everything else
+about "abstraction level" is derived from it, not authored:
+
+```json
+{ "id": "documentProcessing", "type": "backend", "label": "Document Processing Service",
+  "children": ["uploadApi", "objectStore", "processingQueue", "processingWorker", "documentDb"] }
+```
+
+**Hierarchy rules**, enforced as cross-collection checks (the same pass that
+already catches duplicate view/relationship ids), not by the JSON Schema
+alone: every id in `children` must refer to a real component in the same
+document; an id may be claimed by at most one parent; a component may not
+list itself; duplicate ids within one `children` list are rejected; and the
+hierarchy as a whole must be acyclic.
+
+**HLD and LLD are projections of this one document, not separate schemas or
+separate source data.** `archify project architecture <input.json> hld|lld
+[output.json]` is the explicit, opt-in command that produces one:
+
+- **HLD** keeps every component that is not itself a `children` member of
+  another component (top-level and standalone components), hides everything
+  absorbed into a group, and derives connections/boundaries/guided-view
+  focus lists accordingly: a connection whose endpoints both lift to the
+  same HLD-visible ancestor is fully internal to that group and is dropped;
+  a connection whose lifted endpoints differ contributes to exactly one
+  merged HLD connection per directed pair. A single contributing connection
+  keeps its authored id/label unchanged. Multiple contributing connections
+  receive a deterministic synthesized id (`<from>__<to>`) and no label —
+  projection never fabricates a merged description from several authored
+  ones.
+- **LLD** keeps every component that does not itself have a `children` list
+  (every leaf and standalone component), excludes group/parent components,
+  and leaves every authored connection untouched — LLD performs no lifting
+  or merging.
+
+A document that never uses `children` projects to a document deeply equal to
+itself for both `hld` and `lld` — flat documents (everything authored today)
+are unaffected and remain HLD/LLD-equivalent by construction, with no
+special casing required.
+
+Projection output is a normal, schema-valid `architecture.schema.json`
+document — the existing renderer, layout, and visual system consume it
+unmodified, exactly as they consume any hand-authored document. Projection
+is never invoked by `render`, `validate`, or `deliver`; it is only ever run
+by the explicit `project` command. Component ids are never renamed by
+projection, so the same id refers to the same underlying entity whether
+viewed via HLD, LLD, or the unprojected source document.
+
+Like `kind`, `children` is scoped to `architecture.schema.json` only.
+
 ## schema_version policy
 
 Workflow supports schema versions 1 and 2. Version 1 remains the fixed-layout

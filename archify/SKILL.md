@@ -1,5 +1,5 @@
 ---
-name: archify
+name: toolsmith
 description: Create polished, validated architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as explorable standalone HTML with inline SVG, dark/light themes, optional trace motion, and PNG/JPEG/WebP/SVG/WebM export. Accept plain-language requirements or pasted Mermaid flowchart, sequenceDiagram, and stateDiagram input; inspect repository evidence when the diagram must reflect real code. Use when the user asks to visualize system architecture, infrastructure, cloud/security/network topology, technical workflows, API call sequences, request lifecycles, data pipelines, ETL/ELT, data lineage, state machines, or to convert/beautify Mermaid.
 license: MIT
 metadata:
@@ -8,7 +8,9 @@ metadata:
   based_on: Cocoon-AI/architecture-diagram-generator (MIT, v1.0)
 ---
 
-# Archify
+# Toolsmith
+
+Toolsmith builds on the Archify foundation (author tt-a1i, itself based on Cocoon-AI/architecture-diagram-generator); see `NOTICE.md` for the full provenance chain. The CLI is still invoked via `bin/archify.mjs` in the commands below; the `toolsmith` command name runs the identical implementation.
 
 Create a self-contained, interactive HTML diagram from a small typed JSON specification. Static output is the default; enable motion only when the user asks for a demo or presentation.
 

@@ -483,7 +483,7 @@ export async function prepareDiagramBrandMarks(diagramType, diagram) {
     }
     const url = asUrl(node.brand);
     if (url) {
-      unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is an unpinned URL; capture it first with \`archify brands capture ${url.href} --json\``);
+      unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is an unpinned URL; capture it first with \`toolsmith brands capture ${url.href} --json\``);
       return;
     }
     unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is not a built-in brand; closest IDs: ${suggestions(node.brand).join(', ')}`);
@@ -498,8 +498,8 @@ export async function prepareDiagramBrandMarks(diagramType, diagram) {
       subject: { diagramType, collection },
       evidence: {},
       supportedFixes: message.includes('is an unpinned URL')
-        ? ['run `archify brands capture <url> --json` and author the returned digest-pinned brand object']
-        : ['choose an ID from `archify brands`', 'run `archify brands capture <url> --json` for an unknown official site'],
+        ? ['run `toolsmith brands capture <url> --json` and author the returned digest-pinned brand object']
+        : ['choose an ID from `toolsmith brands`', 'run `toolsmith brands capture <url> --json` for an unknown official site'],
     })));
   }
 }

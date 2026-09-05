@@ -72,17 +72,37 @@ function copyInstalledSkill(target) {
 test('cli: help lists commands and diagram types', () => {
   const result = run(['--help']);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /archify render <type>/);
-  assert.match(result.stdout, /archify compare architecture <base\.json> <head\.json>/);
-  assert.match(result.stdout, /archify deliver <type>/);
-  assert.match(result.stdout, /archify preview <type>/);
-  assert.match(result.stdout, /archify visual-check <output\.html>/);
+  assert.match(result.stdout, /toolsmith render <type>/);
+  assert.match(result.stdout, /toolsmith compare architecture <base\.json> <head\.json>/);
+  assert.match(result.stdout, /toolsmith deliver <type>/);
+  assert.match(result.stdout, /toolsmith preview <type>/);
+  assert.match(result.stdout, /toolsmith visual-check <output\.html>/);
   assert.match(result.stdout, /--open/);
   assert.match(result.stdout, /--repo-root path \(architecture only\)/);
-  assert.match(result.stdout, /archify guide \[scenario or question\]/);
-  assert.match(result.stdout, /archify doctor/);
-  assert.match(result.stdout, /archify demo \[output-directory\]/);
+  assert.match(result.stdout, /toolsmith guide \[scenario or question\]/);
+  assert.match(result.stdout, /toolsmith doctor/);
+  assert.match(result.stdout, /toolsmith demo \[output-directory\]/);
   assert.match(result.stdout, /architecture, workflow, sequence, dataflow, lifecycle/);
+  assert.match(result.stdout, /"archify" remains available as a compatibility alias/);
+});
+
+test('cli: toolsmith and archify are two names for the identical implementation', () => {
+  const toolsmithCli = path.join(skillRoot, 'bin/toolsmith.mjs');
+  const viaToolsmith = spawnSync(process.execPath, [toolsmithCli, '--help'], { encoding: 'utf8' });
+  const viaArchify = spawnSync(process.execPath, [cli, '--help'], { encoding: 'utf8' });
+  assert.equal(viaToolsmith.status, 0, viaToolsmith.stderr);
+  assert.equal(viaArchify.status, 0, viaArchify.stderr);
+  assert.equal(viaToolsmith.stdout, viaArchify.stdout);
+  assert.match(viaToolsmith.stdout, /toolsmith render <type>/);
+});
+
+test('cli: package identity is toolsmith with archify preserved as a compatibility bin alias', () => {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(skillRoot, 'package.json'), 'utf8'));
+  assert.equal(packageJson.name, 'toolsmith');
+  assert.deepEqual(packageJson.bin, {
+    toolsmith: './bin/toolsmith.mjs',
+    archify: './bin/archify.mjs',
+  });
 });
 
 test('cli: doctor reports a complete installation is ready', () => {
@@ -98,7 +118,7 @@ test('cli: doctor reports a complete installation is ready', () => {
   assert.match(result.stdout, /\[ok\] Standalone schema validators/);
   assert.match(result.stdout, /\[ok\] architecture renderer, schema, and example/);
   assert.match(result.stdout, /\[ok\] lifecycle renderer, schema, and example/);
-  assert.match(result.stdout, /Archify is ready\./);
+  assert.match(result.stdout, /Toolsmith is ready\./);
 });
 
 test('cli: doctor identifies an incomplete installation', () => {
@@ -116,7 +136,7 @@ test('cli: doctor identifies an incomplete installation', () => {
   assert.match(result.stdout, /\[missing\] Core template/);
   assert.match(result.stdout, /\[missing\] Scenario recipe guide/);
   assert.match(result.stdout, /\[missing\] workflow renderer, schema, and example/);
-  assert.match(result.stderr, /Archify is not ready: \d+ required files? missing\./);
+  assert.match(result.stderr, /Toolsmith is not ready: \d+ required files? missing\./);
 });
 
 test('cli: doctor rejects a corrupt standalone validator', () => {
@@ -131,7 +151,7 @@ test('cli: doctor rejects a corrupt standalone validator', () => {
 
   assert.equal(result.status, 1);
   assert.match(result.stdout, /\[invalid\] Standalone schema validators/);
-  assert.match(result.stderr, /Archify is not ready: 1 runtime check failed\./);
+  assert.match(result.stderr, /Toolsmith is not ready: 1 runtime check failed\./);
 });
 
 test('cli: examples renders from an installed skill', () => {
@@ -159,7 +179,7 @@ test('cli: guide lists all scenario recipes by diagram type', () => {
   const result = run(['guide']);
 
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Archify scenario recipes \(11\)/);
+  assert.match(result.stdout, /Toolsmith scenario recipes \(11\)/);
   for (const type of ['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']) {
     assert.match(result.stdout, new RegExp(`\\[${type}\\]`));
   }
@@ -211,7 +231,7 @@ test('cli: demo creates a ready-to-open diagram in a chosen directory', () => {
   assert.match(fs.readFileSync(output, 'utf8'), /Sample Web App Diagram/);
   assert.match(result.stdout, new RegExp(`Demo ready: ${output.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
   assert.match(result.stdout, /Next: open the HTML in your browser/);
-  assert.match(result.stdout, /archify render architecture/);
+  assert.match(result.stdout, /toolsmith render architecture/);
 });
 
 test('cli: demo defaults to the current directory', () => {

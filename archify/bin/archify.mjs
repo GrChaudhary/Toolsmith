@@ -14,24 +14,29 @@ const TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'life
 
 function usage() {
   return `Usage:
-  archify render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path (architecture only)]
-  archify compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
-  archify deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path (architecture only)]
-  archify preview <type> <input.json> [output.html] [--no-open] [--quality standard|showcase] [--repo-root path (architecture only)]
-  archify validate <type> <input.json> [--json] [--layout-json] [--quality standard|showcase] [--repo-root path (architecture only)]
-  archify migrate workflow <old.json> <new.json> --to-schema 2 [--json]
-  archify inspect <type> <input.json>
-  archify check <output.html>
-  archify visual-check <output.html> [--json]
-  archify guide [scenario or question] [--json] [--lang en|zh]
-  archify brands [name, alias, domain, or category] [--json]
-  archify brands capture <url> [--json]
-  archify examples
-  archify doctor
-  archify demo [output-directory]
+  toolsmith render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path (architecture only)]
+  toolsmith compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
+  toolsmith deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path (architecture only)]
+  toolsmith preview <type> <input.json> [output.html] [--no-open] [--quality standard|showcase] [--repo-root path (architecture only)]
+  toolsmith validate <type> <input.json> [--json] [--layout-json] [--quality standard|showcase] [--repo-root path (architecture only)]
+  toolsmith review architecture <input.json> [--json]
+  toolsmith project architecture <input.json> <hld|lld> [output.json] [--json]
+  toolsmith migrate workflow <old.json> <new.json> --to-schema 2 [--json]
+  toolsmith inspect <type> <input.json>
+  toolsmith check <output.html>
+  toolsmith visual-check <output.html> [--json]
+  toolsmith guide [scenario or question] [--json] [--lang en|zh]
+  toolsmith brands [name, alias, domain, or category] [--json]
+  toolsmith brands capture <url> [--json]
+  toolsmith examples
+  toolsmith doctor
+  toolsmith demo [output-directory]
 
 Types:
   architecture, workflow, sequence, dataflow, lifecycle
+
+Note:
+  "archify" remains available as a compatibility alias for every command above.
 `;
 }
 
@@ -1212,6 +1217,65 @@ async function commandVisualCheck(args) {
   process.exitCode = result.exitCode;
 }
 
+async function commandReview(args) {
+  const json = args.includes('--json');
+  const knownOptions = new Set(['--json']);
+  const unknown = args.filter((arg) => arg.startsWith('--') && !knownOptions.has(arg));
+  if (unknown.length) fail(`Unknown review option "${unknown[0]}".`);
+  const positional = args.filter((arg) => !knownOptions.has(arg));
+  const [type, input] = positional;
+  if (!type || !input || positional.length !== 2) fail(usage());
+  if (type !== 'architecture') {
+    fail('review is currently supported for architecture diagrams only.', 1);
+  }
+
+  let raw;
+  try {
+    raw = fs.readFileSync(input, 'utf8');
+  } catch (error) {
+    fail(`Input could not be read: ${error.message}`, 1);
+  }
+
+  let diagram;
+  try {
+    diagram = JSON.parse(raw);
+  } catch (error) {
+    fail(`Input JSON could not be parsed: ${error.message}`, 1);
+  }
+
+  if (diagram.diagram_type !== 'architecture') {
+    fail(`review expected diagram_type "architecture", found ${JSON.stringify(diagram.diagram_type)}.`, 1);
+  }
+
+  const { runArchitectureReview } = await import(
+    pathToFileURL(path.join(skillRoot, 'review/architecture-review.mjs')).href
+  );
+  const { findings, summary } = runArchitectureReview(diagram);
+
+  if (json) {
+    console.log(JSON.stringify({
+      schemaVersion: 1,
+      ok: true,
+      command: 'review',
+      type,
+      input: path.resolve(input),
+      findings,
+      summary,
+    }, null, 2));
+    return;
+  }
+
+  console.log(`Architecture Review — ${path.resolve(input)}`);
+  if (!findings.length) {
+    console.log('  (no findings — no pilot `kind` values are used in this document)');
+  }
+  for (const finding of findings) {
+    const marker = finding.status === 'pass' ? '✓' : finding.status === 'warning' ? '⚠' : '✗';
+    console.log(`  ${marker} ${finding.message}`);
+  }
+  console.log(`\n${summary.pass} pass, ${summary.warning} warning, ${summary.fail} fail (informational only — does not affect validate/deliver)`);
+}
+
 function commandExamples() {
   const result = runNode([path.join(skillRoot, 'scripts/render-examples.mjs')], { cwd: skillRoot });
   if (result.status !== 0) exitFrom(result);
@@ -1334,7 +1398,7 @@ async function commandDoctor() {
     });
   }
 
-  console.log('Archify doctor\n');
+  console.log('Toolsmith doctor\n');
   for (const check of checks) {
     console.log(`[${check.ok ? 'ok' : (check.failureLabel || 'missing')}] ${check.label}`);
   }
@@ -1343,7 +1407,7 @@ async function commandDoctor() {
   const missingFiles = checks.reduce((count, check) => count + check.missing, 0);
   const invalidRuntime = checks.reduce((count, check) => count + (check.invalid || 0), 0);
   if (nodeFailed === 0 && missingFiles === 0 && invalidRuntime === 0) {
-    console.log('\nArchify is ready.');
+    console.log('\nToolsmith is ready.');
     return;
   }
 
@@ -1351,7 +1415,7 @@ async function commandDoctor() {
   if (nodeFailed) problems.push('Node.js 18 or newer is required');
   if (missingFiles) problems.push(`${missingFiles} required file${missingFiles === 1 ? '' : 's'} missing`);
   if (invalidRuntime) problems.push(`${invalidRuntime} runtime check${invalidRuntime === 1 ? '' : 's'} failed`);
-  console.error(`\nArchify is not ready: ${problems.join('; ')}.`);
+  console.error(`\nToolsmith is not ready: ${problems.join('; ')}.`);
   process.exitCode = 1;
 }
 
@@ -1414,7 +1478,7 @@ async function commandBrands(args) {
   if (unknown.length) fail(`Unknown brands option "${unknown[0]}".`);
   const positional = args.filter((arg) => arg !== '--json');
   if (positional[0] === 'capture') {
-    if (positional.length !== 2) fail('Usage: archify brands capture <url> [--json]');
+    if (positional.length !== 2) fail('Usage: toolsmith brands capture <url> [--json]');
     const { captureBrandReference } = await import('../renderers/shared/brand-marks.mjs');
     let capture;
     try {
@@ -1448,12 +1512,12 @@ async function commandBrands(args) {
       query,
       count: marks.length,
       marks,
-      fallback: 'Run "archify brands capture <url> --json", then use the returned digest-pinned brand value.',
+      fallback: 'Run "toolsmith brands capture <url> --json", then use the returned digest-pinned brand value.',
     }, null, 2));
     return;
   }
   if (!marks.length) {
-    console.log(`No built-in brand matched "${query}". Run "archify brands capture <url> --json", then use the returned digest-pinned brand value.`);
+    console.log(`No built-in brand matched "${query}". Run "toolsmith brands capture <url> --json", then use the returned digest-pinned brand value.`);
     return;
   }
   const grouped = Map.groupBy
@@ -1482,7 +1546,7 @@ function commandDemo(args) {
 
   console.log(`\nDemo ready: ${output}`);
   console.log('Next: open the HTML in your browser, then render your own diagram:');
-  console.log('  archify render architecture <input.json> <output.html>');
+  console.log('  toolsmith render architecture <input.json> <output.html>');
 }
 
 function migrationPathDiagnostics(error, sourcePath, destinationPath) {
@@ -1601,7 +1665,7 @@ async function commandMigrate(args) {
     || options.positional.length !== 3
     || options.toSchema !== '2'
   ) {
-    fail('Usage: archify migrate workflow <old.json> <new.json> --to-schema 2 [--json]');
+    fail('Usage: toolsmith migrate workflow <old.json> <new.json> --to-schema 2 [--json]');
   }
 
   const sourcePath = path.resolve(sourceArgument);
@@ -1814,6 +1878,137 @@ async function commandMigrate(args) {
   }
 }
 
+// HLD and LLD are projections of one Enterprise Semantic IR document, never
+// a separate diagram type or a separate render path. This command is a thin
+// wrapper: read + validate the source exactly as `validate` does, run the
+// pure projectArchitecture() transform, then validate the projected result
+// through the same unmodified architecture renderer/checker before ever
+// writing it out — projection is never wired into validate/deliver/render's
+// own default behavior.
+async function commandProject(args) {
+  const json = args.includes('--json');
+  const knownOptions = new Set(['--json']);
+  const unknown = args.filter((arg) => arg.startsWith('--') && !knownOptions.has(arg));
+  if (unknown.length) fail(`Unknown project option "${unknown[0]}".`);
+  const positional = args.filter((arg) => !knownOptions.has(arg));
+  const [type, input, level, output] = positional;
+  if (type !== 'architecture' || !input || (level !== 'hld' && level !== 'lld') || positional.length < 3 || positional.length > 4) {
+    fail('Usage: toolsmith project architecture <input.json> <hld|lld> [output.json] [--json]');
+  }
+
+  const inputPath = path.resolve(input);
+  const reportProjectFailure = ({ stage, error, diagnostics, status = 1 }) => {
+    if (json) {
+      console.log(JSON.stringify({
+        schemaVersion: 1,
+        ok: false,
+        command: 'project',
+        type,
+        level,
+        stage,
+        input: inputPath,
+        error,
+        diagnostics,
+      }, null, 2));
+    } else {
+      console.error(formatDiagnostics(error, diagnostics));
+    }
+    process.exitCode = status;
+  };
+
+  let sourceDocument;
+  try {
+    sourceDocument = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+  } catch (error) {
+    const failure = inputDiagnostic(error, inputPath);
+    reportProjectFailure({ stage: 'input', error: failure.message, diagnostics: [failure] });
+    return;
+  }
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-project-'));
+  try {
+    // Validate the source exactly as `validate` does before projecting —
+    // projection assumes a schema- and hierarchy-valid input.
+    const sourceCheckOut = path.join(tmp, 'source.html');
+    const sourceRender = runNode([rendererPath('architecture'), inputPath, sourceCheckOut], {
+      stdio: 'pipe',
+      env: rendererEnv(undefined, undefined, true),
+    });
+    if (sourceRender.status !== 0) {
+      const failure = rendererFailure(sourceRender);
+      reportProjectFailure({ stage: 'source', error: failure.error, diagnostics: failure.diagnostics, status: sourceRender.status ?? 1 });
+      return;
+    }
+
+    const { projectArchitecture } = await import(
+      pathToFileURL(path.join(skillRoot, 'projection/architecture-projection.mjs')).href
+    );
+    const projection = projectArchitecture(sourceDocument, level);
+    if (!projection.ok) {
+      reportProjectFailure({ stage: 'projection', error: projection.diagnostics[0]?.message || 'Projection failed.', diagnostics: projection.diagnostics });
+      return;
+    }
+
+    const serialized = `${JSON.stringify(projection.document, null, 2)}\n`;
+    const projectedPath = path.join(tmp, `projected.${level}.architecture.json`);
+    fs.writeFileSync(projectedPath, serialized);
+
+    // Validate the projected result through the same unmodified renderer +
+    // artifact checker used by `validate` — direct proof the existing
+    // rendering pipeline consumes projection output without modification.
+    const projectedCheckOut = path.join(tmp, `projected.${level}.html`);
+    const projectedRender = runNode([rendererPath('architecture'), projectedPath, projectedCheckOut], {
+      stdio: 'pipe',
+      env: rendererEnv(undefined, undefined, true),
+    });
+    if (projectedRender.status !== 0) {
+      const failure = rendererFailure(projectedRender);
+      reportProjectFailure({ stage: 'projected', error: failure.error, diagnostics: failure.diagnostics, status: projectedRender.status ?? 1 });
+      return;
+    }
+    const check = runNode([path.join(skillRoot, 'scripts/check-render-output.mjs'), projectedCheckOut], { stdio: 'pipe' });
+    if (check.status !== 0) {
+      let checker;
+      try {
+        checker = JSON.parse(check.stdout);
+      } catch {
+        checker = null;
+      }
+      reportProjectFailure({ stage: 'projected', error: 'Projected artifact check failed.', diagnostics: checkerDiagnostics(checker), status: check.status ?? 1 });
+      return;
+    }
+
+    let outputPath;
+    if (output) {
+      outputPath = path.resolve(output);
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      fs.writeFileSync(outputPath, serialized);
+    }
+
+    if (json) {
+      console.log(JSON.stringify({
+        schemaVersion: 1,
+        ok: true,
+        command: 'project',
+        type,
+        level,
+        input: inputPath,
+        output: outputPath,
+        changedIds: projection.changedIds,
+      }, null, 2));
+    } else {
+      console.log(`ok ${level} projection of ${inputPath}${outputPath ? ` -> ${outputPath}` : ''}`);
+      console.log(`  dropped components: ${projection.changedIds.droppedComponents.join(', ') || '(none)'}`);
+      if (level === 'hld') {
+        console.log(`  dropped connections: ${projection.changedIds.droppedConnections.join(', ') || '(none)'}`);
+        console.log(`  merged connections: ${projection.changedIds.mergedConnections.length}`);
+      }
+    }
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
 function commandValidate(args) {
   const qualityArgs = extractQualityArgs(args);
   const repoArgs = extractRepoRootArgs(qualityArgs.rest);
@@ -1961,6 +2156,12 @@ switch (command) {
     break;
   case 'validate':
     commandValidate(args);
+    break;
+  case 'review':
+    await commandReview(args);
+    break;
+  case 'project':
+    await commandProject(args);
     break;
   case 'migrate':
     await commandMigrate(args);

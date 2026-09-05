@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Enterprise Pilot: Notifications Platform",
+    "output": "enterprise-pilot-rendered.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    { "id": "users", "type": "external", "label": "Users", "sublabel": "Browser / Mobile", "pos": [40, 300], "size": [130, 60] },
+    { "id": "authProvider", "type": "security", "kind": "identity-provider", "label": "Identity Provider", "sublabel": "OAuth 2.0 / OIDC", "pos": [40, 110], "size": [130, 64], "security": { "auth_method": "OAuth2.0" } },
+    { "id": "api", "type": "backend", "label": "API Service", "sublabel": "Node.js :8080", "pos": [460, 300], "size": [130, 60] },
+    { "id": "sessionCache", "type": "database", "kind": "cache", "label": "Session Cache", "sublabel": "Redis :6379", "pos": [460, 110], "size": [130, 60], "technology": { "name": "Redis", "vendor": "Redis Ltd." } },
+    { "id": "notifyQueue", "type": "messagebus", "kind": "queue", "label": "Notify Queue", "sublabel": "async notifications", "pos": [460, 490], "size": [130, 60], "ownership": { "team": "platform-messaging", "status": "active" } },
+    { "id": "db", "type": "database", "label": "Primary Store", "sublabel": "PostgreSQL :5432", "pos": [880, 300], "size": [130, 60], "deployment": { "provider": "AWS" } }
+  ],
+  "connections": [
+    { "id": "users-to-api", "from": "users", "to": "api", "label": "HTTPS" },
+    { "id": "auth-verify", "from": "authProvider", "to": "api", "label": "verify token", "variant": "security", "fromSide": "right", "toSide": "top" },
+    { "id": "api-to-cache", "from": "api", "to": "sessionCache", "label": "read-through", "labelAt": [560, 184] },
+    { "id": "api-to-db", "from": "api", "to": "db", "label": "SQL" },
+    { "id": "api-to-queue", "from": "api", "to": "notifyQueue", "label": "enqueue notification", "labelDy": 24 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Enterprise kind pilot", "items": ["authProvider: componentType security + kind identity-provider", "sessionCache: componentType database + kind cache", "notifyQueue: componentType messagebus + kind queue"] },
+    { "dot": "slate", "title": "Backward compatibility", "items": ["api, db, and users carry no kind and remain valid, unmodified componentType usage"] }
+  ]
+}

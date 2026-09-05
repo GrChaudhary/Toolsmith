@@ -23,6 +23,7 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample, argv = p
   validateSchema(diagramType, diagram);
   validateGuidedViews(diagramType, diagram);
   validateRelationshipIds(diagramType, diagram);
+  validateComponentHierarchy(diagramType, diagram);
   validateEngineeringProfile(diagramType, diagram);
   const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.ARCHIFY_REPO_ROOT);
   const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
@@ -141,6 +142,90 @@ export function validateGuidedViews(diagramType, diagram) {
     throwDiagnosticProblems('Guided view validation failed', problems, {
       code: 'guided-view/invalid',
       subject: { diagramType, collection: 'meta.views' },
+    });
+  }
+}
+
+// `children` (Phase 3, architecture only) expresses composition: a parent/
+// group component's HLD summary decomposes into these leaf components at
+// LLD. JSON Schema can check each id's shape, but not that ids exist, are
+// claimed by at most one parent, or form a forest rather than a cycle —
+// those are cross-collection facts, checked here alongside the other
+// cross-collection passes (duplicate view/relationship ids) rather than in
+// a new, parallel validation framework.
+export function validateComponentHierarchy(diagramType, diagram) {
+  if (diagramType !== 'architecture') return;
+  const components = Array.isArray(diagram.components) ? diagram.components : [];
+  const componentIds = new Set(components.map((component) => component.id));
+  const parentOf = new Map();
+  const problems = [];
+
+  components.forEach((component, index) => {
+    if (!Array.isArray(component.children)) return;
+    const seenInList = new Set();
+    component.children.forEach((childId, childIndex) => {
+      if (seenInList.has(childId)) {
+        problems.push(`/components/${index}/children/${childIndex} duplicates child id ${JSON.stringify(childId)} within the same parent`);
+        return;
+      }
+      seenInList.add(childId);
+
+      if (childId === component.id) {
+        problems.push(`/components/${index}/children/${childIndex} references its own parent ${JSON.stringify(component.id)} (self-reference)`);
+        return;
+      }
+      if (!componentIds.has(childId)) {
+        problems.push(`/components/${index}/children/${childIndex} references unknown component id ${JSON.stringify(childId)}`);
+        return;
+      }
+      if (parentOf.has(childId) && parentOf.get(childId) !== component.id) {
+        problems.push(`/components/${index}/children/${childIndex} claims child ${JSON.stringify(childId)}, which is already a child of ${JSON.stringify(parentOf.get(childId))}`);
+        return;
+      }
+      parentOf.set(childId, component.id);
+    });
+  });
+
+  // Cycle detection over the id-valid, non-self-referential edges above —
+  // a standard three-color DFS. Multiple-parent claims are already reported
+  // separately; this only needs one edge per (parent, child) pair to find a
+  // cycle, so it tolerates the rejected duplicate/second-parent edges being
+  // present in the raw `children` arrays.
+  const childrenOf = new Map(components.map((component) => [
+    component.id,
+    Array.isArray(component.children)
+      ? component.children.filter((id) => componentIds.has(id) && id !== component.id)
+      : [],
+  ]));
+  const WHITE = 0;
+  const GRAY = 1;
+  const BLACK = 2;
+  const color = new Map(components.map((component) => [component.id, WHITE]));
+
+  function visit(id, path) {
+    color.set(id, GRAY);
+    path.push(id);
+    for (const childId of childrenOf.get(id) || []) {
+      const childColor = color.get(childId);
+      if (childColor === GRAY) {
+        const cycleStart = path.indexOf(childId);
+        problems.push(`components hierarchy contains a cycle: ${[...path.slice(cycleStart), childId].join(' -> ')}`);
+      } else if (childColor === WHITE) {
+        visit(childId, path);
+      }
+    }
+    path.pop();
+    color.set(id, BLACK);
+  }
+
+  for (const component of components) {
+    if (color.get(component.id) === WHITE) visit(component.id, []);
+  }
+
+  if (problems.length) {
+    throwDiagnosticProblems('Component hierarchy validation failed', problems, {
+      code: 'hierarchy/invalid',
+      subject: { diagramType, collection: 'components' },
     });
   }
 }

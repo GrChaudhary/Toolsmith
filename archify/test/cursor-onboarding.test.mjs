@@ -47,6 +47,8 @@ test('the zero-dependency archive works from the canonical Cursor-visible agent 
     const installed = path.join(agentSkills, 'archify');
     const cli = path.join(installed, 'bin', 'archify.mjs');
     const doctor = execFileSync(process.execPath, [cli, 'doctor'], { encoding: 'utf8' });
+    // archify.zip is a stale, pre-Toolsmith-identity build artifact until it is
+    // rebuilt from this working tree, so it still reports the prior branding.
     assert.match(doctor, /Archify is ready\./);
 
     const fixtures = {

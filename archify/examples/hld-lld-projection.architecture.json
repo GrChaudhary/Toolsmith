@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Doc Processing Platform",
+    "quality_profile": "showcase",
+    "output": "hld-lld-projection-rendered.html"
+  },
+  "components": [
+    { "id": "webApp", "type": "frontend", "label": "Web App", "pos": [40, 300], "size": [130, 60] },
+    { "id": "docProcessing", "type": "backend", "label": "Document Processing Service", "pos": [300, 290], "size": [220, 80],
+      "children": ["uploadApi", "objectStore", "processingQueue", "processingWorker", "documentDb"] },
+    { "id": "uploadApi", "type": "backend", "label": "Upload API", "pos": [280, 140], "size": [130, 60] },
+    { "id": "objectStore", "type": "cloud", "label": "Object Storage", "pos": [480, 60], "size": [130, 60] },
+    { "id": "processingQueue", "type": "messagebus", "kind": "queue", "label": "Processing Queue", "pos": [480, 220], "size": [130, 60] },
+    { "id": "processingWorker", "type": "backend", "label": "Processing Worker", "pos": [680, 220], "size": [130, 60] },
+    { "id": "documentDb", "type": "database", "label": "Document DB", "pos": [680, 380], "size": [130, 60] }
+  ],
+  "connections": [
+    { "id": "webapp-to-upload", "from": "webApp", "to": "uploadApi", "label": "POST /upload", "fromSide": "top", "toSide": "left" },
+    { "from": "uploadApi", "to": "objectStore", "label": "store file", "labelDy": -20 },
+    { "from": "uploadApi", "to": "processingQueue", "label": "enqueue", "fromSide": "right", "toSide": "left" },
+    { "from": "processingQueue", "to": "processingWorker" },
+    { "from": "processingWorker", "to": "documentDb", "label": "persist result", "labelDy": 24 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Hierarchy pilot", "items": ["docProcessing groups 5 leaf components via children", "HLD shows only webApp and docProcessing", "LLD shows every leaf, docProcessing excluded"] }
+  ]
+}

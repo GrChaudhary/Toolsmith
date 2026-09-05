@@ -1,11 +1,12 @@
 {
-  "name": "archify",
+  "name": "toolsmith",
   "version": "2.17.0-dev.1",
   "private": true,
   "type": "module",
   "description": "JSON-IR diagram renderers (architecture / workflow / sequence / dataflow / lifecycle).",
   "license": "MIT",
   "bin": {
+    "toolsmith": "./bin/toolsmith.mjs",
     "archify": "./bin/archify.mjs"
   },
   "engines": {

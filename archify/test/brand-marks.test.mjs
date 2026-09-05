@@ -30,9 +30,9 @@ test('third-party notices cover every recorded individual mark license', () => {
   const notices = fs.readFileSync(path.join(skillRoot, 'THIRD_PARTY_NOTICES.md'), 'utf8');
   const licensedMarks = BRAND_MARKS.filter((mark) => mark.provenance?.license);
 
-  assert.equal(THIRD_PARTY_NOTICE_DISCLOSURE_COUNT, 34, 'notice contract changed without review');
+  assert.equal(THIRD_PARTY_NOTICE_DISCLOSURE_COUNT, 31, 'notice contract changed without review');
   assert.deepEqual(validateThirdPartyNotices(notices), { ok: true, missing: [] });
-  assert.equal(licensedMarks.length, 8, 'pinned Simple Icons license inventory changed');
+  assert.equal(licensedMarks.length, 7, 'pinned Simple Icons license inventory changed');
   for (const mark of licensedMarks) {
     assert.match(notices, new RegExp(`\\| ${mark.title.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')} \\|`));
     assert.ok(notices.includes(mark.provenance.source), `${mark.id} source must be disclosed`);
@@ -128,7 +128,7 @@ function nodeBlock(html, id) {
 }
 
 test('generated catalog exposes a substantial, unique, provenance-backed preset library', () => {
-  assert.equal(BRAND_MARKS.length, 107);
+  assert.equal(BRAND_MARKS.length, 106);
   assert.equal(new Set(BRAND_MARKS.map((mark) => mark.id)).size, BRAND_MARKS.length);
   for (const mark of BRAND_MARKS) {
     assert.match(mark.id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -663,7 +663,7 @@ test('unknown preset names fail with a repairable public CLI diagnostic', () => 
   const receipt = JSON.parse(result.stdout);
   assert.equal(receipt.ok, false);
   assert.ok(receipt.diagnostics.some((entry) => entry.code === 'brand/unknown'));
-  assert.ok(receipt.diagnostics.some((entry) => entry.supportedFixes.some((fix) => fix.includes('archify brands'))));
+  assert.ok(receipt.diagnostics.some((entry) => entry.supportedFixes.some((fix) => fix.includes('toolsmith brands'))));
 });
 
 test('viewer exposes brand identity to Passport and Finder while keeping source beacons clear', () => {
