@@ -20,7 +20,11 @@ test('Cursor onboarding stays explicit and backed by the same Skill', () => {
   const landing = fs.readFileSync(path.join(repoRoot, 'docs', 'index.html'), 'utf8');
 
   assert.match(english, /Cursor, Claude Code, Codex CLI, and OpenCode/);
-  for (const surface of [english, landing]) assert.ok(surface.includes(cursorCommand));
+  // README.md was deliberately reframed around cloning this fork directly
+  // (git clone + copy into a Skills directory) rather than the tt-a1i-scoped
+  // Skill registry install; docs/index.html is untouched by that reframe and
+  // still documents the registry-based per-agent commands.
+  assert.ok(landing.includes(cursorCommand));
   for (const surface of [english, start, landing]) {
     assert.doesNotMatch(surface, /skills use[^\n<]*--agent cursor/);
     assert.doesNotMatch(surface, /~\/\.cursor\/skills\/archify/);

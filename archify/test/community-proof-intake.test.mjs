@@ -37,7 +37,8 @@ test('showcase intake requires reproducible proof, redaction, and explicit publi
 
   // README_EN.md/README_ZH.md were deliberately removed; README.md is the
   // single canonical README.
-  const submissionUrl = 'https://github.com/tt-a1i/archify/issues/new?template=showcase.yml';
+  // This fork's own issue tracker, not upstream tt-a1i/archify.
+  const submissionUrl = 'https://github.com/GrChaudhary/Toolsmith/issues/new?template=showcase.yml';
   for (const readme of ['README.md']) {
     assert.match(read(readme), new RegExp(submissionUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${readme}: direct showcase link`);
   }

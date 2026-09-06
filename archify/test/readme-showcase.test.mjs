@@ -128,28 +128,25 @@ test('README keeps the product hero and retains the verified animated proof', ()
     assert.ok(heroIndex >= 0 && heroIndex < titleIndex, `${filename}: product hero is not above the title`);
     assert.ok(proofIndex > demosIndex, `${filename}: animated proof must live in the demo section`);
     assert.match(readme, /docs\/assets\/archify-live-proof\.gif/);
-    assert.match(readme, /https:\/\/tt-a1i\.github\.io\/archify\/gallery\.html/);
+    // The README was deliberately reframed to point at the local, self-contained
+    // docs/gallery.html rather than tt-a1i's hosted Pages site, since this fork
+    // has no GitHub Pages of its own.
+    assert.match(readme, /docs\/gallery\.html/);
   }
 });
 
-test('README installation table contains a complete DeepSeek Harness row', () => {
+test('README installation table no longer advertises the tt-a1i-scoped DeepSeek Harness package', () => {
+  // The README was deliberately reframed to describe this fork as its own
+  // standalone repository (clone + copy install), decoupled from tt-a1i's
+  // published DSH-integration npm package and Skill registry listing. That
+  // integration still ships under its own directory with its own docs/tests;
+  // it is intentionally no longer surfaced from the main installation table.
   for (const filename of ['README.md']) {
     const readme = fs.readFileSync(path.join(repoRoot, filename), 'utf8');
     const row = readme.split('\n').find((line) => line.startsWith('| **DeepSeek Harness** |'));
-    assert.ok(row, `${filename}: DeepSeek Harness must be an installation table row`);
-    assert.equal(
-      (row.match(/(?<!\\)\|/g) || []).length,
-      4,
-      `${filename}: DeepSeek Harness must have exactly three table cells`,
-    );
-    assert.ok(
-      row.includes('Node `^22.19.0 \\|\\| >=24.0.0`'),
-      `${filename}: Node version pipes must be escaped inside the table row`,
-    );
-    assert.ok(
-      readme.includes(`${row}\n\n`),
-      `${filename}: installation table must end after the DeepSeek Harness row`,
-    );
+    assert.equal(row, undefined, `${filename}: DeepSeek Harness row should have been intentionally removed`);
+    const installationTableEnd = readme.split('\n').find((line) => line.startsWith('| **Project Knowledge** |'));
+    assert.ok(installationTableEnd, `${filename}: installation table must still end with Project Knowledge`);
   }
 });
 
@@ -229,8 +226,11 @@ test('README stays scannable without deleting the visual proof set', () => {
 });
 
 test('README ends with the self-hosted star history chart', () => {
-  const lightChart = 'https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-light.svg';
-  const darkChart = 'https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-dark.svg';
+  // This fork's own repository, not upstream tt-a1i/archify — the star-history
+  // workflow (.github/workflows/star-history.yml) is repo-agnostic and
+  // populates whichever repository runs it.
+  const lightChart = 'https://raw.githubusercontent.com/GrChaudhary/Toolsmith/star-history/assets/star-history-light.svg';
+  const darkChart = 'https://raw.githubusercontent.com/GrChaudhary/Toolsmith/star-history/assets/star-history-dark.svg';
   const workflow = fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'star-history.yml'), 'utf8');
 
   for (const filename of ['README.md']) {
