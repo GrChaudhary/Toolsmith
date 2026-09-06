@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/tt-a1i/archify/schemas/cross-link.schema.json",
+  "title": "Archify Cross-Link",
+  "description": "A separate relationship artifact linking Funnel Stages to Architecture components. It never lives inside a Funnel or Architecture document, and neither of those documents ever embeds it or references it back — both remain independently valid whether or not any Cross-Link document exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "diagram_type",
+    "meta",
+    "links"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "diagram_type": {
+      "const": "cross-link"
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle": {
+          "type": "string"
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "funnel",
+          "architecture"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "funnel": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "document",
+              "stageId"
+            ],
+            "properties": {
+              "document": {
+                "type": "string",
+                "minLength": 1
+              },
+              "stageId": {
+                "$ref": "common.schema.json#/$defs/id"
+              }
+            }
+          },
+          "architecture": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "document",
+              "componentId",
+              "level"
+            ],
+            "properties": {
+              "document": {
+                "type": "string",
+                "minLength": 1
+              },
+              "componentId": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "level": {
+                "enum": [
+                  "hld",
+                  "lld"
+                ]
+              }
+            }
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    }
+  }
+}

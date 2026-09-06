@@ -10,7 +10,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const schemasDir = path.join(root, 'schemas');
 const output = path.join(root, 'renderers/shared/generated-validators.mjs');
-const diagramTypes = ['workflow', 'sequence', 'dataflow', 'lifecycle', 'architecture'];
+// 'crossLink' is the JS-identifier-safe key validateSchema()/validators[...]
+// dispatch on; the document's own diagram_type value is "cross-link" (the
+// schema's const), unrelated to this key's spelling.
+const diagramTypes = ['workflow', 'sequence', 'dataflow', 'lifecycle', 'architecture', 'funnel', 'crossLink'];
+const schemaFileNames = { crossLink: 'cross-link' };
 
 const ajv = new Ajv2020({
   allErrors: true,
@@ -21,7 +25,8 @@ ajv.addSchema(JSON.parse(fs.readFileSync(path.join(schemasDir, 'common.schema.js
 
 const schemaIds = {};
 for (const type of diagramTypes) {
-  const schema = JSON.parse(fs.readFileSync(path.join(schemasDir, `${type}.schema.json`), 'utf8'));
+  const fileName = schemaFileNames[type] || type;
+  const schema = JSON.parse(fs.readFileSync(path.join(schemasDir, `${fileName}.schema.json`), 'utf8'));
   ajv.addSchema(schema);
   schemaIds[type] = schema.$id;
 }

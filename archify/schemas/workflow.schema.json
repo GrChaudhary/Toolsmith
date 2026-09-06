@@ -53,8 +53,12 @@
             "classic",
             "signal-flow",
             "blueprint",
-            "editorial"
+            "editorial",
+            "contrast"
           ]
+        },
+        "effects": {
+          "$ref": "common.schema.json#/$defs/visualEffects"
         },
         "quality_profile": {
           "enum": [

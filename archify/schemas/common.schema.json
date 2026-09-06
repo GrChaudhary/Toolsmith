@@ -14,7 +14,14 @@
       "enum": ["trace", "none"]
     },
     "visualPreset": {
-      "enum": ["classic", "signal-flow", "blueprint", "editorial"]
+      "enum": ["classic", "signal-flow", "blueprint", "editorial", "contrast"]
+    },
+    "visualEffect": {
+      "enum": ["glow", "grain", "depth"]
+    },
+    "visualEffects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/visualEffect" }
     },
     "qualityProfile": {
       "enum": ["standard", "showcase"]

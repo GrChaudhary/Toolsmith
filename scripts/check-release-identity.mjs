@@ -246,21 +246,15 @@ if (hasSupportedVersion) {
     fail(`archify/assets/template.html generator must be archify ${version}; found ${generatorVersions.join(', ') || '(missing)'}.`);
   }
 
+  // README_EN.md/README_ZH.md were deliberately removed; README.md is the
+  // single canonical README.
   const english = read('README.md');
-  const englishMirror = read('README_EN.md');
-  const chinese = read('README_ZH.md');
   checkReadme('README.md', english, version, 'en', isDevelopment);
-  checkReadme('README_EN.md', englishMirror, version, 'en', isDevelopment);
-  checkReadme('README_ZH.md', chinese, version, 'zh', isDevelopment);
   checkRavenBoundary('README.md', english, 'en');
-  checkRavenBoundary('README_EN.md', englishMirror, 'en');
-  checkRavenBoundary('README_ZH.md', chinese, 'zh');
-  if (english !== englishMirror) fail('README_EN.md must remain byte-identical to README.md.');
 
   if (newestStableLabel && isDevelopment) {
     const stableMinor = newestStableLabel.split('.').slice(0, 2).join('\\.');
-    if (new RegExp(`Archify ${stableMinor} includes\\b`).test(english)
-      || new RegExp(`Archify ${stableMinor} 已覆盖`).test(chinese)) {
+    if (new RegExp(`Archify ${stableMinor} includes\\b`).test(english)) {
       fail(`README capability summary must describe v${version} as development, not published ${newestStableLabel}.`);
     }
   }

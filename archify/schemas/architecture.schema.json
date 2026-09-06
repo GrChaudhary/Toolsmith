@@ -24,6 +24,7 @@
         "output": { "type": "string" },
         "animation": { "$ref": "common.schema.json#/$defs/animation" },
         "visual_preset": { "$ref": "common.schema.json#/$defs/visualPreset" },
+    "effects": { "$ref": "common.schema.json#/$defs/visualEffects" },
         "quality_profile": { "$ref": "common.schema.json#/$defs/qualityProfile" },
         "engineering_profile": { "enum": ["deployment-ownership"] },
         "repository": {
