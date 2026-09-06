@@ -1,5 +1,5 @@
 
-![Toolsmith product preview](docs/assets/Toolsmith-readme-hero.png)
+![Toolsmith product preview](docs/assets/archify-readme-hero.png)
 
 # Toolsmith
 
@@ -18,21 +18,21 @@ Toolsmith is a Node.js rendering and validation system for Cursor, Claude Code, 
 
 **Current development version:** `v2.17.0-dev.1`. See [Changelog](CHANGELOG.md#unreleased).
 
-**[Project page](https://tt-a1i.github.io/Toolsmith/)** · **[Scenario guide](https://tt-a1i.github.io/Toolsmith/guide.html)** · **[Proof Lab](https://tt-a1i.github.io/Toolsmith/gallery.html)**
+**[Project page](https://tt-a1i.github.io/archify/)** · **[Scenario guide](https://tt-a1i.github.io/archify/guide.html)** · **[Proof Lab](https://tt-a1i.github.io/archify/gallery.html)**
 
 ```bash
-npx skills add tt-a1i/Toolsmith -g
+npx skills add tt-a1i/archify -g
 ```
 
-Using Cursor? Open the [agent-aware quick start](https://tt-a1i.github.io/Toolsmith/start.html?agent=cursor&type=architecture) for exact global and project commands.
+Using Cursor? Open the [agent-aware quick start](https://tt-a1i.github.io/archify/start.html?agent=cursor&type=architecture) for exact global and project commands.
 
 **No repository is required:** describe the system in any agent chat.
 
 ## ❤️ Sponsors
 
 <table>
-  <tr><td align="center" width="240"><a href="https://apinebula.ai/ref/wywnaATT"><img src="docs/assets/sponsors/apinebula-Toolsmith.jpg" alt="APINEBULA" width="200" /></a><br/><strong><a href="https://apinebula.ai/ref/wywnaATT">APINEBULA</a></strong></td><td>APINEBULA sponsors Toolsmith with one API for Claude, GPT, Gemini, and more. <a href="https://apinebula.ai/ref/wywnaATT">Register through Toolsmith</a> and use <strong><code>Toolsmith</code></strong> for <strong>10% off</strong>.</td></tr>
-  <tr><td align="center" width="240"><a href="https://github.com/EverMind-AI/Raven"><img src="docs/assets/sponsors/evermind-Toolsmith-raven.png" alt="Toolsmith × Raven" width="200" /></a><br/><strong><a href="https://github.com/EverMind-AI">EverMind</a> · <a href="https://github.com/EverMind-AI/Raven">Raven</a></strong></td><td>EverMind sponsors Toolsmith and builds memory infrastructure for agents. Its <a href="https://github.com/EverMind-AI/Raven"><strong>Raven</strong></a> harness supports Toolsmith as a Skill for verified, interactive system maps.</td></tr>
+  <tr><td align="center" width="240"><a href="https://apinebula.ai/ref/wywnaATT"><img src="docs/assets/sponsors/apinebula-archify.jpg" alt="APINEBULA" width="200" /></a><br/><strong><a href="https://apinebula.ai/ref/wywnaATT">APINEBULA</a></strong></td><td>APINEBULA sponsors Toolsmith with one API for Claude, GPT, Gemini, and more. <a href="https://apinebula.ai/ref/wywnaATT">Register through Toolsmith</a> and use <strong><code>Toolsmith</code></strong> for <strong>10% off</strong>.</td></tr>
+  <tr><td align="center" width="240"><a href="https://github.com/EverMind-AI/Raven"><img src="docs/assets/sponsors/evermind-archify-raven.png" alt="Toolsmith × Raven" width="200" /></a><br/><strong><a href="https://github.com/EverMind-AI">EverMind</a> · <a href="https://github.com/EverMind-AI/Raven">Raven</a></strong></td><td>EverMind sponsors Toolsmith and builds memory infrastructure for agents. Its <a href="https://github.com/EverMind-AI/Raven"><strong>Raven</strong></a> harness supports Toolsmith as a Skill for verified, interactive system maps.</td></tr>
 </table>
 
 > Want to sponsor Toolsmith? [Contact us by email.](mailto:2801884530@qq.com)
@@ -42,23 +42,23 @@ Using Cursor? Open the [agent-aware quick start](https://tt-a1i.github.io/Toolsm
 These are generated Toolsmith artifacts, not product mockups. Click a frame to open its live, shareable state.
 
 <p align="center">
-  <a href="https://tt-a1i.github.io/Toolsmith/gallery.html"><img src="docs/assets/Toolsmith-live-proof.gif" alt="Three verified Toolsmith artifacts moving through Signal Flow, Blueprint, and Classic presets" width="960"/></a>
+  <a href="https://tt-a1i.github.io/archify/gallery.html"><img src="docs/assets/archify-live-proof.gif" alt="Three verified Toolsmith artifacts moving through Signal Flow, Blueprint, and Classic presets" width="960"/></a>
   <br/>
-  <sub><strong>Three real generated artifacts.</strong> Signal Flow · Blueprint · Classic · <a href="https://tt-a1i.github.io/Toolsmith/gallery.html">open the interactive Proof Lab ↗</a></sub>
+  <sub><strong>Three real generated artifacts.</strong> Signal Flow · Blueprint · Classic · <a href="https://tt-a1i.github.io/archify/gallery.html">open the interactive Proof Lab ↗</a></sub>
 </p>
 
 | Guided story | Route probe | Semantic lens |
 |---|---|---|
-| [![Agent workflow playing one authored chapter](docs/assets/Toolsmith-demo-story.png)](https://tt-a1i.github.io/Toolsmith/gallery/artifacts/agent-tool-call.workflow.html?theme=dark&present=1&play=1#view=happy-path) | [![Cache-miss sequence showing the Web App to Postgres route](docs/assets/Toolsmith-demo-route.png)](https://tt-a1i.github.io/Toolsmith/gallery/artifacts/cache-miss.sequence.html?theme=dark&present=1#route=web~db) | [![Production architecture comparing backend and database roles](docs/assets/Toolsmith-demo-lens.png)](https://tt-a1i.github.io/Toolsmith/gallery/artifacts/production-deployment.architecture.html?theme=dark&present=1#lens=backend~database) |
+| [![Agent workflow playing one authored chapter](docs/assets/archify-demo-story.png)](https://tt-a1i.github.io/archify/gallery/artifacts/agent-tool-call.workflow.html?theme=dark&present=1&play=1#view=happy-path) | [![Cache-miss sequence showing the Web App to Postgres route](docs/assets/archify-demo-route.png)](https://tt-a1i.github.io/archify/gallery/artifacts/cache-miss.sequence.html?theme=dark&present=1#route=web~db) | [![Production architecture comparing backend and database roles](docs/assets/archify-demo-lens.png)](https://tt-a1i.github.io/archify/gallery/artifacts/production-deployment.architecture.html?theme=dark&present=1#lens=backend~database) |
 | Play one finite named chapter. | Inspect the shortest authored directed path. | Compare real traffic between semantic roles. |
 
-The [Proof Lab](https://tt-a1i.github.io/Toolsmith/gallery.html) contains all 11 checked-in scenarios, their JSON sources, named views, and validation receipts.
+The [Proof Lab](https://tt-a1i.github.io/archify/gallery.html) contains all 11 checked-in scenarios, their JSON sources, named views, and validation receipts.
 
 ### A real repository, mapped from source
 
-[![MCO runtime architecture generated from the public mco-org/mco repository](docs/assets/mco-runtime-share-card.png)](https://tt-a1i.github.io/Toolsmith/cases/mco-runtime.architecture.html?theme=dark&present=1#view=dispatch-path)
+[![MCO runtime architecture generated from the public mco-org/mco repository](docs/assets/mco-runtime-share-card.png)](https://tt-a1i.github.io/archify/cases/mco-runtime.architecture.html?theme=dark&present=1#view=dispatch-path)
 
-Toolsmith traced [`mco-org/mco`](https://github.com/mco-org/mco) at `9f1a1cf` and produced this checked map. **[Open it ↗](https://tt-a1i.github.io/Toolsmith/cases/mco-runtime.architecture.html?theme=dark&present=1#view=dispatch-path)** · [trace reach ↗](https://tt-a1i.github.io/Toolsmith/cases/mco-runtime.architecture.html?theme=dark#focus=router&reach=downstream) · [typed source](docs/cases/mco-runtime.architecture.json)
+Toolsmith traced [`mco-org/mco`](https://github.com/mco-org/mco) at `9f1a1cf` and produced this checked map. **[Open it ↗](https://tt-a1i.github.io/archify/cases/mco-runtime.architecture.html?theme=dark&present=1#view=dispatch-path)** · [trace reach ↗](https://tt-a1i.github.io/archify/cases/mco-runtime.architecture.html?theme=dark#focus=router&reach=downstream) · [typed source](docs/cases/mco-runtime.architecture.json)
 
 ## Preview
 
@@ -66,17 +66,17 @@ Same diagram, two themes, one click to switch:
 
 | Dark | Light |
 |---|---|
-| ![Dark theme](docs/assets/Toolsmith-dark.png) | ![Light theme](docs/assets/Toolsmith-light.png) |
+| ![Dark theme](docs/assets/archify-dark.png) | ![Light theme](docs/assets/archify-light.png) |
 
 The Export menu copies PNG to the clipboard and downloads static or motion formats:
 
-![Export menu](docs/assets/Toolsmith-menu.png)
+![Export menu](docs/assets/archify-menu.png)
 
 Use **Copy Share Card** when you want a canonical 1200×630 image for a README, release, or social post.
 
 After tracing a route, **Export → Route Share Card** downloads that authored path as a 1200×630 PNG with the full diagram retained for context.
 
-![Route Share Card showing the exact Users to API Server path with the full architecture retained as context](docs/assets/Toolsmith-route-share-card.png)
+![Route Share Card showing the exact Users to API Server path with the full architecture retained as context](docs/assets/archify-route-share-card.png)
 
 After tracing authored `Upstream` or `Downstream` reach, **Export → Reach Share Card** captures that exact reading without claiming runtime impact.
 
@@ -89,26 +89,26 @@ Open [`examples/web-app.html`](examples/web-app.html) locally to try the complet
 ### 1. Install
 
 ```bash
-npx skills add tt-a1i/Toolsmith -g
+npx skills add tt-a1i/archify -g
 ```
 
 For an explicit, non-interactive Cursor install:
 
 ```bash
-npx -y skills add tt-a1i/Toolsmith --skill Toolsmith --agent cursor --global --copy --yes
+npx -y skills add tt-a1i/archify --skill archify --agent cursor --global --copy --yes
 ```
 
 To try without installing:
 
 ```bash
-npx skills use tt-a1i/Toolsmith@Toolsmith --agent codex
+npx skills use tt-a1i/archify@archify --agent codex
 ```
 
-[DSH community opt-in](integrations/deepseek-harness/README.md): `dsh plugin --profile web add @tt-a1i/Toolsmith-dsh@0.1.0`
+[DSH community opt-in](integrations/deepseek-harness/README.md): `dsh plugin --profile web add @tt-a1i/archify-dsh@0.1.0`
 
-The [agent switcher](https://tt-a1i.github.io/Toolsmith/start.html?agent=cursor&type=architecture) covers `cursor`, `codex`, `claude-code`, and `opencode`. For Raven's manual ZIP install, extract [`Toolsmith.zip`](Toolsmith.zip) into `~/.raven/workspace/skills`; it yields `~/.raven/workspace/skills/Toolsmith`. Raven is not a switcher target.
+The [agent switcher](https://tt-a1i.github.io/archify/start.html?agent=cursor&type=architecture) covers `cursor`, `codex`, `claude-code`, and `opencode`. For Raven's manual ZIP install, extract [`archify.zip`](archify.zip) into `~/.raven/workspace/skills`; it yields `~/.raven/workspace/skills/archify`. Raven is not a switcher target.
 
-Toolsmith may GET the fixed stable manifest solely to show an optional reminder; it never downloads or installs updates. Successful checks wait about 72 hours (±20%); active use retries failures after 6, then 24 hours. The server sees normal HTTP metadata (IP and time), but receives no version, Agent, project data, prompts, account/device ID, or ETag. You decide whether and when to update. Set `Toolsmith_UPDATE_CHECK_DISABLED=1` to disable networking and reminder-state writes.
+Toolsmith may GET the fixed stable manifest solely to show an optional reminder; it never downloads or installs updates. Successful checks wait about 72 hours (±20%); active use retries failures after 6, then 24 hours. The server sees normal HTTP metadata (IP and time), but receives no version, Agent, project data, prompts, account/device ID, or ETag. You decide whether and when to update. Set `ARCHIFY_UPDATE_CHECK_DISABLED=1` to disable networking and reminder-state writes.
 
 ### 2. Start from a description — no repository required
 
@@ -138,38 +138,38 @@ Continue with focused requests such as `add Redis`, `move auth to the left`, or 
 | **Data Flow** | Pipelines, lineage, PII, consumers | Sources, transforms, stores, boundaries |
 | **Lifecycle** | States, retries, waits, terminal outcomes | States, events, retry and cancellation paths |
 
-Architecture's optional `deployment-ownership` profile fails closed when authored owners, region placement, private database scope, or named crossings are missing; it is never implicit and does not inspect live infrastructure. See the [checked deployment proof](https://tt-a1i.github.io/Toolsmith/gallery.html#proof-deployment-ownership).
+Architecture's optional `deployment-ownership` profile fails closed when authored owners, region placement, private database scope, or named crossings are missing; it is never implicit and does not inspect live infrastructure. See the [checked deployment proof](https://tt-a1i.github.io/archify/gallery.html#proof-deployment-ownership).
 
 For design or PR review, Architecture Delta compares validated Before / Delta / After snapshots with a machine receipt. Select an authored change or play one finite, viewer-only Review; it infers no impact, risk, or merge safety.
 
-`node Toolsmith/bin/Toolsmith.mjs compare architecture base.json head.json architecture-delta.html --json`
+`node archify/bin/archify.mjs compare architecture base.json head.json architecture-delta.html --json`
 
 [![Architecture Delta showing added, removed, changed, and moved authored facts](docs/assets/architecture-delta-proof.jpg)](examples/checkout-platform-delta.html)
 
-Not sure which one fits? Use the [interactive scenario guide](https://tt-a1i.github.io/Toolsmith/guide.html), or ask the zero-dependency CLI:
+Not sure which one fits? Use the [interactive scenario guide](https://tt-a1i.github.io/archify/guide.html), or ask the zero-dependency CLI:
 
 ```bash
-node Toolsmith/bin/Toolsmith.mjs guide "Show an API request with Redis cache miss"
-node Toolsmith/bin/Toolsmith.mjs guide "Map Kafka topics, consumer groups, replay, and DLQ" --json
+node archify/bin/archify.mjs guide "Show an API request with Redis cache miss"
+node archify/bin/archify.mjs guide "Map Kafka topics, consumer groups, replay, and DLQ" --json
 ```
 
 Workflow keeps the happy path clear across lanes:
 
-![Workflow example](docs/assets/Toolsmith-workflow.png)
+![Workflow example](docs/assets/archify-workflow.png)
 
 Sequence explains one interaction over time:
 
-![Sequence example](docs/assets/Toolsmith-sequence.png)
+![Sequence example](docs/assets/archify-sequence.png)
 
 Data Flow makes movement and sensitivity boundaries explicit:
 
-![Data Flow example](docs/assets/Toolsmith-dataflow.png)
+![Data Flow example](docs/assets/archify-dataflow.png)
 
 Lifecycle separates progress, waits, retries, and terminal outcomes:
 
-![Lifecycle example](docs/assets/Toolsmith-lifecycle.png)
+![Lifecycle example](docs/assets/archify-lifecycle.png)
 
-Architecture examples: [`web-app`](examples/web-app.html) · [`Toolsmith pipeline`](examples/Toolsmith-repo.html) · [`grid placement`](examples/Toolsmith-repo-grid.html) · [`desktop agent`](examples/maka-architecture.html)
+Architecture examples: [`web-app`](examples/web-app.html) · [`Toolsmith pipeline`](examples/archify-repo.html) · [`grid placement`](examples/archify-repo-grid.html) · [`desktop agent`](examples/maka-architecture.html)
 
 ## Why Toolsmith
 
@@ -197,13 +197,13 @@ Toolsmith is not a general-purpose drawing editor or a Mermaid theme. It turns t
 Useful repository commands:
 
 ```bash
-cd Toolsmith
-node bin/Toolsmith.mjs doctor
-node bin/Toolsmith.mjs demo /tmp/Toolsmith-demo
-node bin/Toolsmith.mjs guide "Show CI/CD checks, approval, deploy, and rollback"
-node bin/Toolsmith.mjs validate workflow examples/agent-tool-call.workflow.json --quality showcase --json
-node bin/Toolsmith.mjs preview workflow examples/agent-tool-call.workflow.json /tmp/workflow.html --quality showcase
-node bin/Toolsmith.mjs deliver workflow examples/agent-tool-call.workflow.json /tmp/workflow.html --quality showcase --open --json
+cd archify
+node bin/archify.mjs doctor
+node bin/archify.mjs demo /tmp/Toolsmith-demo
+node bin/archify.mjs guide "Show CI/CD checks, approval, deploy, and rollback"
+node bin/archify.mjs validate workflow examples/agent-tool-call.workflow.json --quality showcase --json
+node bin/archify.mjs preview workflow examples/agent-tool-call.workflow.json /tmp/workflow.html --quality showcase
+node bin/archify.mjs deliver workflow examples/agent-tool-call.workflow.json /tmp/workflow.html --quality showcase --open --json
 ```
 
 `preview` is an explicit loopback-only desktop mode: it watches one JSON file on a random `127.0.0.1` port, keeps the last verified output through failures, stops with Ctrl-C, and adds no generated-HTML runtime. Use `--no-open` for tests or manual URL opening.
@@ -243,26 +243,26 @@ Settings:
 
 Stable links can restore `#focus=<id>`, `#focus=<id>&reach=upstream|downstream`, `#relation=<id>`, `#route=<source>~<target>`, `#lens=<kind>~<kind>`, and `#view=<view-id>`. Reader-driven motion is finite, respects `prefers-reduced-motion`, and never enters canonical exports.
 
-The complete generation and viewer contract lives in [`Toolsmith/SKILL.md`](Toolsmith/SKILL.md).
+The complete generation and viewer contract lives in [`archify/SKILL.md`](archify/SKILL.md).
 
 ## Installation options
 
 | Surface | Install location or method | Capability |
 |---|---|---|
-| **Raven** | Manual ZIP into `~/.raven/workspace/skills` → `~/.raven/workspace/skills/Toolsmith` | Full renderer + validation workflow |
+| **Raven** | Manual ZIP into `~/.raven/workspace/skills` → `~/.raven/workspace/skills/archify` | Full renderer + validation workflow |
 | **Claude Code** | `~/.claude/skills/` or `.claude/skills/` | Full renderer + validation workflow |
 | **Codex CLI** | `~/.agents/skills/` or `.agents/skills/` | Full renderer + validation workflow |
 | **opencode** | `~/.config/opencode/skills/`, `.opencode/skills/`, or `.agents/skills/` | Full renderer + validation workflow |
-| **Claude.ai** | Upload `Toolsmith.zip` under Settings → Capabilities → Skills | Depends on Node.js access in the sandbox |
-| **Project Knowledge** | Upload `Toolsmith.zip` to the project | Prompt-driven architecture fallback |
-| **DeepSeek Harness** | Opt-in: `dsh plugin --profile web add @tt-a1i/Toolsmith-dsh@0.1.0`. Invoke: `Use the Toolsmith skill to map this repository's runtime architecture.` Remove: `dsh plugin --profile web remove @tt-a1i/Toolsmith-dsh`. | Community integration for developer-preview `@deepseek-ai/dsh@0.1.0-rc.6`; Node `^22.19.0 \|\| >=24.0.0`; not an official DeepSeek product. No telemetry. Shell files need exact workspace paths, not Web Produced Files. [Details](integrations/deepseek-harness/README.md). |
+| **Claude.ai** | Upload `archify.zip` under Settings → Capabilities → Skills | Depends on Node.js access in the sandbox |
+| **Project Knowledge** | Upload `archify.zip` to the project | Prompt-driven architecture fallback |
+| **DeepSeek Harness** | Opt-in: `dsh plugin --profile web add @tt-a1i/archify-dsh@0.1.0`. Invoke: `Use the archify skill to map this repository's runtime architecture.` Remove: `dsh plugin --profile web remove @tt-a1i/archify-dsh`. | Community integration for developer-preview `@deepseek-ai/dsh@0.1.0-rc.6`; Node `^22.19.0 \|\| >=24.0.0`; not an official DeepSeek product. No telemetry. Shell files need exact workspace paths, not Web Produced Files. [Details](integrations/deepseek-harness/README.md). |
 
 ## Reference and scope
 
-- [Schema reference](Toolsmith/schemas/README.md) · [Skill](Toolsmith/SKILL.md) · [Examples](Toolsmith/examples/) · [Agent cookbook](docs/authoring-cookbook.md)
+- [Schema reference](archify/schemas/README.md) · [Skill](archify/SKILL.md) · [Examples](archify/examples/) · [Agent cookbook](docs/authoring-cookbook.md)
 - [Changelog](CHANGELOG.md)
 - [Roadmap](ROADMAP.md)
-- [Generated Proof Lab](https://tt-a1i.github.io/Toolsmith/gallery.html)
+- [Generated Proof Lab](https://tt-a1i.github.io/archify/gallery.html)
 
 Automatic Mermaid parsing, general-purpose auto-layout, hosted sharing, and WYSIWYG editing are intentionally outside the current scope.
 
@@ -272,8 +272,8 @@ Automatic Mermaid parsing, general-purpose auto-layout, hosted sharing, and WYSI
 
 ## Contributing
 
-Issues, pull requests, and real-world diagrams are welcome. Start with the [contribution guide](CONTRIBUTING.md), use the reproducible bug form for failures, or submit a validated diagram through the [community showcase form](https://github.com/tt-a1i/Toolsmith/issues/new?template=showcase.yml).&nbsp;·&nbsp;[LINUX&nbsp;DO](https://linux.do)
+Issues, pull requests, and real-world diagrams are welcome. Start with the [contribution guide](CONTRIBUTING.md), use the reproducible bug form for failures, or submit a validated diagram through the [community showcase form](https://github.com/tt-a1i/archify/issues/new?template=showcase.yml).&nbsp;·&nbsp;[LINUX&nbsp;DO](https://linux.do)
 
 ## Star History
 
-<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/tt-a1i/Toolsmith/star-history/assets/star-history-dark.svg" /><img alt="Star History" src="https://raw.githubusercontent.com/tt-a1i/Toolsmith/star-history/assets/star-history-light.svg" /></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-dark.svg" /><img alt="Star History" src="https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-light.svg" /></picture></p>

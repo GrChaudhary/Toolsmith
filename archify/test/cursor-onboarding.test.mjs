@@ -11,18 +11,17 @@ const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
 const cursorCommand = 'npx -y skills add tt-a1i/archify --skill archify --agent cursor --global --copy --yes';
 
-test('Cursor onboarding stays explicit, bilingual, and backed by the same Skill', () => {
+test('Cursor onboarding stays explicit and backed by the same Skill', () => {
+  // README.md is the single canonical README (README_EN.md/README_ZH.md were
+  // deliberately removed from the repository); docs/start.html remains
+  // bilingual in-page and is checked independently below.
   const english = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
-  const englishMirror = fs.readFileSync(path.join(repoRoot, 'README_EN.md'), 'utf8');
-  const chinese = fs.readFileSync(path.join(repoRoot, 'README_ZH.md'), 'utf8');
   const start = fs.readFileSync(path.join(repoRoot, 'docs', 'start.html'), 'utf8');
   const landing = fs.readFileSync(path.join(repoRoot, 'docs', 'index.html'), 'utf8');
 
-  assert.equal(english, englishMirror, 'English README mirrors must stay synchronized');
   assert.match(english, /Cursor, Claude Code, Codex CLI, and OpenCode/);
-  assert.match(chinese, /Cursor、Claude Code、Codex CLI 和 OpenCode/);
-  for (const surface of [english, chinese, landing]) assert.ok(surface.includes(cursorCommand));
-  for (const surface of [english, chinese, start, landing]) {
+  for (const surface of [english, landing]) assert.ok(surface.includes(cursorCommand));
+  for (const surface of [english, start, landing]) {
     assert.doesNotMatch(surface, /skills use[^\n<]*--agent cursor/);
     assert.doesNotMatch(surface, /~\/\.cursor\/skills\/archify/);
     assert.doesNotMatch(surface, /all Cursor models|every Cursor model/i);
@@ -47,9 +46,7 @@ test('the zero-dependency archive works from the canonical Cursor-visible agent 
     const installed = path.join(agentSkills, 'archify');
     const cli = path.join(installed, 'bin', 'archify.mjs');
     const doctor = execFileSync(process.execPath, [cli, 'doctor'], { encoding: 'utf8' });
-    // archify.zip is a stale, pre-Toolsmith-identity build artifact until it is
-    // rebuilt from this working tree, so it still reports the prior branding.
-    assert.match(doctor, /Archify is ready\./);
+    assert.match(doctor, /Toolsmith is ready\./);
 
     const fixtures = {
       architecture: 'web-app.architecture.json',

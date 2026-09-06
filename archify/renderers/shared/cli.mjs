@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { applyTemplate, renderCards, esc } from './utils.mjs';
+import { applyTemplate, renderCards, esc, normalizeVisualEffects } from './utils.mjs';
 import { validateSchema } from './validator.mjs';
 import { verifyRepositoryEvidence } from './repository-evidence.mjs';
 import { installRendererDiagnosticBoundary, throwDiagnosticProblems } from './diagnostics.mjs';
@@ -24,6 +24,7 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample, argv = p
   validateGuidedViews(diagramType, diagram);
   validateRelationshipIds(diagramType, diagram);
   validateComponentHierarchy(diagramType, diagram);
+  validateFunnelReferences(diagramType, diagram);
   validateEngineeringProfile(diagramType, diagram);
   const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.ARCHIFY_REPO_ROOT);
   const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
@@ -36,7 +37,11 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample, argv = p
   };
   const { outputPath: outPath } = resolveOutputPath(outputRequest);
   outputPathGuards.set(outPath, outputRequest);
-  return { diagram, template, outPath, sourceEvidence };
+  // inputPath: additive (Phase 16) so a caller that needs to identify "this
+  // document" by filename — e.g. Cross-Link matching a link's
+  // funnel.document string — doesn't need to re-derive argv[2] itself.
+  // Every existing caller destructures only the keys it already used.
+  return { diagram, template, outPath, sourceEvidence, inputPath };
 }
 
 // Brand URL capture is the only asynchronous authoring step. Typed renderers
@@ -48,7 +53,7 @@ export async function loadDiagramWithBrandMarks(options) {
   return loaded;
 }
 
-const START_TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
+const START_TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle', 'funnel']);
 
 // Common CLI tail: fill the template and write the standalone HTML file.
 export function writeDiagram({ outPath, template, diagramType, meta, svg, cards, sourceEvidence = null }) {
@@ -63,6 +68,7 @@ export function writeDiagram({ outPath, template, diagramType, meta, svg, cards,
     cards: renderCards(cards),
     locale: meta.locale,
     visualPreset: meta.visual_preset || 'classic',
+    visualEffects: meta.effects || [],
     guidedViews: meta.views || [],
     sourceEvidence,
   }));
@@ -76,6 +82,7 @@ const SEMANTIC_COLLECTIONS = {
   sequence: 'participants',
   dataflow: 'nodes',
   lifecycle: 'states',
+  funnel: 'stages',
 };
 
 const RELATIONSHIP_COLLECTIONS = {
@@ -84,6 +91,7 @@ const RELATIONSHIP_COLLECTIONS = {
   sequence: 'messages',
   dataflow: 'flows',
   lifecycle: 'transitions',
+  funnel: 'transitions',
 };
 
 // Relationship IDs are optional for backwards compatibility, but once an
@@ -230,17 +238,90 @@ export function validateComponentHierarchy(diagramType, diagram) {
   }
 }
 
+// Funnel (Phase 9): `stages`/`transitions` form the required customer-journey
+// graph; `personas`/`touchpoints`/`actions` are optional supporting
+// collections. JSON Schema bounds each collection's own item shape but not
+// cross-collection facts — id uniqueness within a collection, and every
+// reference (Stage.personas, Action.stage, Action.touchpoint,
+// Transition.from/to) resolving to a real id elsewhere in the document.
+// Checked here alongside the other cross-collection passes (duplicate view
+// ids via validateGuidedViews, duplicate transition ids via
+// validateRelationshipIds now that funnel is registered in
+// RELATIONSHIP_COLLECTIONS) rather than in a new, parallel validation
+// framework. Branching, reconvergence, and cycles are valid Funnel semantics
+// — a stage may carry `outcome: "conversion"` or `"dropoff"` and still be the
+// source of an outgoing transition — so, unlike validateComponentHierarchy's
+// containment graph, this never rejects a cycle.
+export function validateFunnelReferences(diagramType, diagram) {
+  if (diagramType !== 'funnel') return;
+  const problems = [];
+
+  function collectIds(collectionName) {
+    const items = Array.isArray(diagram[collectionName]) ? diagram[collectionName] : [];
+    const ids = new Set();
+    const seen = new Set();
+    items.forEach((item, index) => {
+      if (seen.has(item.id)) {
+        problems.push(`/${collectionName}/${index}/id duplicates ${collectionName} id ${JSON.stringify(item.id)}`);
+      }
+      seen.add(item.id);
+      ids.add(item.id);
+    });
+    return ids;
+  }
+
+  const personaIds = collectIds('personas');
+  const stageIds = collectIds('stages');
+  const touchpointIds = collectIds('touchpoints');
+  collectIds('actions');
+
+  (diagram.stages || []).forEach((stage, index) => {
+    (stage.personas || []).forEach((personaId, personaIndex) => {
+      if (!personaIds.has(personaId)) {
+        problems.push(`/stages/${index}/personas/${personaIndex} references unknown persona id ${JSON.stringify(personaId)}`);
+      }
+    });
+  });
+
+  (diagram.actions || []).forEach((action, index) => {
+    if (!stageIds.has(action.stage)) {
+      problems.push(`/actions/${index}/stage references unknown stage id ${JSON.stringify(action.stage)}`);
+    }
+    if (action.touchpoint !== undefined && !touchpointIds.has(action.touchpoint)) {
+      problems.push(`/actions/${index}/touchpoint references unknown touchpoint id ${JSON.stringify(action.touchpoint)}`);
+    }
+  });
+
+  (diagram.transitions || []).forEach((transition, index) => {
+    if (!stageIds.has(transition.from)) {
+      problems.push(`/transitions/${index}/from references unknown stage id ${JSON.stringify(transition.from)}`);
+    }
+    if (!stageIds.has(transition.to)) {
+      problems.push(`/transitions/${index}/to references unknown stage id ${JSON.stringify(transition.to)}`);
+    }
+  });
+
+  if (problems.length) {
+    throwDiagnosticProblems('Funnel reference validation failed', problems, {
+      code: 'funnel/invalid-reference',
+      subject: { diagramType, collection: 'stages/transitions/actions/touchpoints/personas' },
+    });
+  }
+}
+
 // Accessible name for the generated diagram SVG.
 export function svgRootAttrs(meta) {
   const animation = meta.animation === 'trace' ? ' data-animation="trace"' : '';
   const preset = ` data-preset="${esc(meta.visual_preset || 'classic')}"`;
+  const effectsAttr = normalizeVisualEffects(meta.effects).join(' ');
+  const effects = effectsAttr ? ` data-effects="${esc(effectsAttr)}"` : '';
   const engineeringProfile = meta.engineering_profile
     ? ` data-engineering-profile="${esc(meta.engineering_profile)}"`
     : '';
   const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || meta.quality_profile;
   const qualityProfile = requestedProfile === 'showcase' ? 'showcase' : 'standard';
   const advisory = requestedProfile ? '' : ' data-quality-gates="advisory"';
-  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="archify-diagram-title archify-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
+  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="archify-diagram-title archify-diagram-description"${animation}${preset}${effects}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
 }
 
 // Keep the accessible name inside the SVG so it survives standalone SVG
@@ -273,6 +354,12 @@ export function focusNodeAttrs(id, label, metadata = {}, locale) {
     ['data-node-brand-id', metadata.brandId],
     ['data-node-brand-status', metadata.brandStatus],
     ['data-node-brand-source', metadata.brandSource],
+    // Generic, optional: a JSON-serialized array of {title, items[]} groups a
+    // renderer wants the Semantic Passport to reveal on focus, beyond the
+    // fixed kind/sublabel/tag/context/brand slots above. No renderer other
+    // than Funnel (Phase 11) currently sets this, so existing output is
+    // unaffected unless a caller passes it.
+    ['data-node-detail-groups', metadata.detailGroups],
   ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
     .map(([name, value]) => ` ${name}="${esc(String(value))}"`)
     .join('');

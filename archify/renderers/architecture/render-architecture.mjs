@@ -10,6 +10,7 @@ import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandM
 import { minimumReadableSourceTextPx } from '../shared/desktop-readability.mjs';
 import { translateMessage as i18nText } from '../shared/i18n.mjs';
 import { gridLayout, resolveComponentPos, validateGridPlacement } from './grid.mjs';
+import { loadCrossLinkContext } from './cross-link-context.mjs';
 import {
   asArray,
   isFinitePoint,
@@ -52,11 +53,23 @@ const componentTextFit = {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const layoutJsonMode = process.argv.includes('--layout-json');
 const cliArgs = process.argv.filter((arg) => arg !== '--layout-json');
-const { diagram: arch, template, outPath, sourceEvidence } = await loadDiagramWithBrandMarks({
+const { diagram: arch, template, outPath, sourceEvidence, inputPath } = await loadDiagramWithBrandMarks({
   rendererDir: __dirname,
   diagramType: 'architecture',
   defaultExample: 'web-app.architecture.json',
   argv: cliArgs,
+});
+
+// Cross-Link (Part 2, Workstream A): opt-in via `--cross-link <path>`; see
+// cross-link-context.mjs for why this never affects any existing invocation
+// that omits the flag. `--cross-link` is filtered out of cliArgs the same
+// way `--layout-json` already is, so it never reaches loadDiagramWithBrandMarks
+// as a stray positional.
+const { crossLinkGroupFor } = loadCrossLinkContext({
+  argv: process.argv,
+  inputPath,
+  architecture: arch,
+  locale: arch.meta.locale,
 });
 
 const grid = gridLayout(arch);
@@ -992,7 +1005,21 @@ function renderComponent(c) {
     : '';
   const brand = renderBrandMark(c, { x: c.x + c.width - 22, y: c.y + 6 });
   const labelFontSize = fittedNodeFontSize(c.label, brandLabelFitWidth(c, c.width), 11, 8);
-  const passport = { kind: c.type, sublabel: c.sublabel, tag: c.tag, context: componentContext(c), ...brandMetadataFor(c) };
+  // Cross-Link (Part 2, Workstream A): a component with linked Funnel Stages
+  // gets one extra generic {title, items} group — the exact same
+  // data-node-detail-groups slot Funnel's Passport already uses, so no new
+  // Passport architecture, and no Funnel-specific field on the component
+  // itself. `null` when --cross-link was not passed or this component has no
+  // links, so passport.detailGroups stays undefined and output is unchanged.
+  const crossLinkGroup = crossLinkGroupFor(c.id);
+  const passport = {
+    kind: c.type,
+    sublabel: c.sublabel,
+    tag: c.tag,
+    context: componentContext(c),
+    ...brandMetadataFor(c),
+    detailGroups: crossLinkGroup ? JSON.stringify([crossLinkGroup]) : undefined,
+  };
   return `        <g ${focusNodeAttrs(c.id, c.label, passport, arch.meta.locale)}>
           ${focusNodeTitle(c.label, passport)}
           <rect x="${c.x}" y="${c.y}" width="${c.width}" height="${c.height}" rx="6" class="c-mask"/>

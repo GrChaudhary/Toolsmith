@@ -8,6 +8,14 @@ import {
 
 export { esc };
 
+// Deterministic, order-independent, and deduplicated so authored effect
+// order never changes rendered markup or DOM/CSS matching. Shared by
+// applyTemplate (HTML root) and svgRootAttrs (standalone SVG export root)
+// so both attach the identical data-effects token list.
+export function normalizeVisualEffects(effects) {
+  return [...new Set(Array.isArray(effects) ? effects : [])].sort();
+}
+
 export function renderDefinitions() {
   return `        <!-- Definitions -->
         <defs>
@@ -130,6 +138,7 @@ export function applyTemplate(template, {
   cards,
   locale,
   visualPreset = 'classic',
+  visualEffects = [],
   guidedViews = [],
   sourceEvidence = null,
 }) {
@@ -162,13 +171,15 @@ export function applyTemplate(template, {
   const renderedSubtitle = typeof subtitle === 'string' && subtitle.trim()
     ? `<p class="subtitle">${esc(subtitle)}</p>`
     : '';
+  const effectsAttr = normalizeVisualEffects(visualEffects).join(' ');
+  const dataEffects = effectsAttr ? ` data-effects="${esc(effectsAttr)}"` : '';
   const i18nData = `    <script id="archify-i18n-data" type="application/json">${i18nJson}</script>`;
   const localizedTemplate = localizeTemplate(template, resolvedLocale);
   const templateWithI18n = localizedTemplate.includes(I18N_PLACEHOLDER)
     ? localizedTemplate.replace(I18N_PLACEHOLDER, () => i18nData)
     : localizedTemplate.replace(GUIDED_VIEWS_PLACEHOLDER, () => `${i18nData}\n    ${GUIDED_VIEWS_PLACEHOLDER}`);
   return templateWithI18n
-    .replace(TEMPLATE_PLACEHOLDERS[0], () => `<html lang="${esc(resolvedLocale)}" data-theme="dark" data-preset="${esc(visualPreset)}">`)
+    .replace(TEMPLATE_PLACEHOLDERS[0], () => `<html lang="${esc(resolvedLocale)}" data-theme="dark" data-preset="${esc(visualPreset)}"${dataEffects}>`)
     .replace(TEMPLATE_PLACEHOLDERS[1], () => `<title>${esc(translateMessage(resolvedLocale, 'page.title', { title }))}</title>`)
     .replace(TEMPLATE_PLACEHOLDERS[2], () => `<h1>${esc(title)}</h1>`)
     .replace(SUBTITLE_SLOT_RE, (_match, indent, newline = '') => renderedSubtitle

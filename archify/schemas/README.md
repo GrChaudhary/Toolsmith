@@ -12,12 +12,15 @@ against one of the schemas in this folder before any layout work happens.
 | `dataflow.schema.json` | `diagram_type: "dataflow"` | `stages`, `nodes`, `flows` |
 | `lifecycle.schema.json` | `diagram_type: "lifecycle"` | `lanes`, `states`, `transitions` |
 | `architecture.schema.json` | `diagram_type: "architecture"` | `components`, `boundaries`, `connections` |
+| `funnel.schema.json` | `diagram_type: "funnel"` | `personas`, `stages`, `actions`, `touchpoints`, `transitions` |
 | `common.schema.json` | shared `$defs` only (no top-level document) | — |
 
 Every diagram schema requires `schema_version`, `diagram_type`, `meta` (with
 `title`), and its structural arrays — except `segments`, `activations`, and
-`cards`, which are optional — and sets `additionalProperties: false` at every
-level, so unknown fields are rejected rather than silently ignored.
+`cards`, which are optional, and Funnel's `personas`, `actions`, and
+`touchpoints`, which are likewise optional (only `stages` and `transitions`
+are required) — and sets `additionalProperties: false` at every level, so
+unknown fields are rejected rather than silently ignored.
 
 Every `meta` object also accepts `animation: "trace"` for opt-in SVG/CSS motion
 in generated HTML. Omit it, or set `"none"`, for the default static output.
@@ -29,8 +32,45 @@ locale values fail schema validation instead of being guessed or silently
 rewritten.
 `visual_preset` accepts `classic` (the stable default), `signal-flow` (luminous
 motion-forward presentation), `blueprint` (high-contrast engineering review),
-or `editorial` (warm publication-style design review and documentation).
-Presets change only viewer styling; they do not alter semantic IDs or geometry.
+`editorial` (warm publication-style design review and documentation), or
+`contrast` (a minimal, near-black/near-white, single-accent preset for
+maximum-legibility review contexts). Presets change only viewer styling; they
+do not alter semantic IDs or geometry.
+
+Every `meta` object also accepts `effects`, an array drawn from `glow`,
+`grain`, and `depth`. Effects are a second, independent presentation axis —
+composable with any preset and either theme rather than encoded as one more
+preset combination (e.g. `visual_preset: "blueprint"` with
+`effects: ["glow", "depth"]` is valid and does not require a
+"blueprint-glow-depth" preset to exist). `glow` adds a soft highlight to
+emphasis-role connections and their arrowheads (`.a-emphasis`/`.m-emphasis`,
+the same classes `arrowClassMap` already assigns); it is present in both the
+live viewer and a standalone exported SVG. `depth` adds elevation shading to
+the diagram panel and info cards. `grain` adds a subtle, static (non-random,
+fixed-seed) noise texture to the diagram panel background. `depth` and
+`grain` are page-chrome treatments, like the existing toolbar/card styling,
+and are intentionally absent from standalone SVG export — the same boundary
+`assets/template.html`'s export pipeline already draws around toolbar CSS.
+Omitting `effects`, or leaving it empty, renders identically to every
+document written before this field existed. Effects style existing
+diagram-type-agnostic structural classes; no renderer branches on diagram
+type to apply them.
+
+The reader-facing style picker in the toolbar (`Archify.preset`,
+`assets/template.html`) also offers `contrast` as a fifth try-on option,
+alongside the four existing presets — it reads its own list from a single
+array plus one `[data-preset-value]` menu entry per style, so adding a style
+there is a small, bounded, mechanical change with no new interaction model.
+`effects` deliberately has no equivalent live toolbar toggle: it is
+authored-only, set in the document's own `meta.effects`. Building an
+accessible multi-select "Effects" menu — with its own keyboard navigation,
+ARIA state, and session-only try-on persistence — would mean substantially
+extending the same large, heavily-tested toolbar script the style picker
+already lives in, for a presentation axis that (unlike style, which every
+reader may want to try live) is more naturally an authoring-time choice a
+diagram's owner makes once. If a live effects toggle is wanted later, the
+style picker's own array-plus-menu-item structure is the template to follow.
+
 Sequence `meta` additionally accepts `column_fit`. The default `fixed` keeps
 the historical 108px column gap and 86px participant boxes, so an authored
 diagram renders at the same coordinates no matter how wide its viewBox is.
@@ -242,9 +282,195 @@ they must not reinterpret authored IR or turn a previously valid profile-less
 v1 file into a new hard layout failure. Breaking IR changes require a new
 version; additive, backwards-compatible fields do not.
 
+## Funnel semantic model (customer experience, pilot)
+
+`funnel.schema.json` is a sibling semantic domain to Architecture, not an
+extension of it — `diagram_type: "funnel"` documents are validated against
+their own schema and share nothing with `architecture.schema.json` except
+`common.schema.json#/$defs/id`. There is no `componentType`, `children`, or
+other Architecture vocabulary anywhere in the funnel schema, and Architecture
+is unaware `funnel.schema.json` exists.
+
+**Funnel IR describes customer-observable experience: personas, journey
+stages, the actions a customer takes, the touchpoints they act through, and
+the transitions between stages.** It has no `type`, `service`, `API`,
+`database`, or other Architecture/technical vocabulary — a stage's `outcome`
+is `"conversion"` or `"dropoff"` (a result a customer experiences), never
+`"failure"` (a technical/infrastructure concept, which does not appear
+anywhere in this schema). Structural arrays: `personas` (optional),
+`stages` (required, at least two), `actions` (optional), `touchpoints`
+(optional), `transitions` (required). A stage may carry an `outcome` while
+still being the source of further outgoing transitions — dropoff and
+conversion describe a customer-observable result reachable at a stage, not
+that stage's structural terminal-ness; the graph itself allows branching,
+reconvergence, and cycles (e.g. a `"loop"`-role transition back to an earlier
+stage) and is never required to be acyclic.
+
+**Semantic truth vs. presentation is an explicit, deliberate boundary.** The
+schema intentionally does not include `views`, `cards`, `animation`, focus,
+viewport, or visual-styling fields, even though sibling schemas accept some
+of these in their own `meta` — Funnel's product principle is that the
+semantic IR holds the complete customer-experience truth, and presentation is
+a progressive-disclosure layer on top of it (clean default view → optionally
+reveal Actions/Touchpoints/Personas/Friction/Decisions/Outcomes → optionally
+enable Cards/Guided Views/animation/focus/persona filtering/drill-down) that
+never mutates or is encoded into the semantic document. Something's absence
+from `funnel.schema.json` does not mean Toolsmith won't eventually support
+richer Funnel presentation — it means that capability belongs in a
+presentation/renderer layer once one exists, the same way `cards` and
+`views` already sit in `meta` as optional presentation contracts for the
+other five diagram types rather than being load-bearing semantic facts.
+
+Three layers stay conceptually distinct, and none of them is Funnel semantic
+truth:
+
+- **Presentation configuration** answers "how should this document be
+  presented?" — e.g. `meta.views` (which reader paths exist), `meta.cards`
+  (what a summary card shows), `meta.animation`/`meta.visual_preset`. These
+  are author-set, schema-validated, and part of the document today for the
+  other five types.
+- **Runtime interaction state** answers "what is happening in the viewer
+  right now?" — e.g. which node is focused, which guided-view step is
+  active, current zoom/pan, animation progress. This is never authored and
+  never part of any schema. `assets/template.html`'s canonical-export path
+  explicitly strips `data-focus-active`, `data-route-*`, `data-story-*`, and
+  `data-lens-*` attributes before producing an exported artifact — direct
+  repository evidence that this layer is already kept out of anything
+  durable, let alone semantic IR.
+- **Generic presentation infrastructure** is the reusable machinery neither
+  of the above needs to reimplement per diagram type — `focusNodeAttrs`/
+  `focusEdgeAttrs`, the guided-view/relationship-id registries below, and the
+  template's Reading Depth / zoom / export mechanics, none of which contain
+  `diagram_type`-specific logic.
+
+Funnel does not yet have presentation configuration of its own (no
+`meta.views`/`meta.cards` in `funnel.schema.json`); it participates only in
+the generic infrastructure layer today (see the registry paragraph below).
+Adding Funnel-specific presentation configuration is future, separately
+justified work, not assumed by this phase.
+
+Referential integrity across Funnel's collections — `Stage.personas[]`,
+`Action.stage`, `Action.touchpoint`, and `Transition.from`/`Transition.to`
+each resolving to a real id elsewhere in the document, plus duplicate ids
+within any one collection — is enforced by `validateFunnelReferences()` in
+`renderers/shared/cli.mjs`, the same cross-collection-checks pattern
+`validateComponentHierarchy()` established for Architecture's `children`.
+Unlike that check, it never rejects a cycle. Funnel's `transitions` are also
+registered in the shared `RELATIONSHIP_COLLECTIONS` registry (duplicate
+transition ids) and `stages` in `SEMANTIC_COLLECTIONS` (a no-op today, since
+the schema has no `meta.views` yet, but ready if Funnel adds guided-view
+support later) — the same generic registries every other renderer's loader
+already uses, extended by a one-line entry each rather than new
+funnel-specific logic.
+
+Funnel has a renderer as of Phase 10 — `renderers/funnel/render-funnel.mjs`,
+invoked directly (`node renderers/funnel/render-funnel.mjs input.json
+output.html`) exactly like the other five, see `renderers/funnel/README.md`
+for its Overview-only scope and Stage-positioning strategy. As of Phase 11
+that renderer also populates an Explore layer: focusing a Stage node reveals
+its Decision/Actions/Touchpoints/Personas/Friction through the existing
+Semantic Passport's new, generic, optional detail-groups section — the same
+progressive-disclosure principle above, now with a working default→explore
+path. Nothing here is written back into the Funnel document; see
+`renderers/funnel/README.md`'s Explore section and
+`renderers/funnel/explore-detail.mjs` for the read-only projection this is
+built on. As of Phase 12, the same renderer also offers Persona Lens: a
+read-only presentation filter (one button per `funnel.personas` entry) that
+dims Stages/Transitions not applicable to the selected Persona — one graph,
+no lanes, no per-Persona copy — leaving the Funnel document and Explore both
+completely unchanged. See `renderers/funnel/README.md`'s Persona Lens
+section and `renderers/funnel/persona-focus.mjs` for the one pure rule
+(`isStageApplicableToPersona`) it's built on. As of Phase 13, the Stage
+`outcome` values `conversion`/`dropoff` — already surfaced since Phase 10
+through `data-node-kind` — receive distinct CSS-only visual treatment (a
+color-token pairing plus a stroke-dasharray, so the pair is distinguishable
+without relying on hue alone), reusing the same "alias a semantic kind onto
+an existing brand color token" convention `assets/template.html` already
+uses for its own state kinds; no schema field, renderer attribute, or
+Passport/Persona Lens behavior changed. See `renderers/funnel/README.md`'s
+Outcome styling section. As of Phase 14, Transition `role` values
+`primary`/`alternative`/`loop` — already surfaced since Phase 10 through
+`data-edge-role` — likewise receive distinct visual treatment, by making the
+renderer variant-aware of the same shared `arrowClassMap` (class + marker
+pairs) every other Archify renderer's edges already use, selected from a
+renderer-local derivation of `role` rather than any new schema or IR field.
+Node outcome styling (Phase 13) and edge role styling (Phase 14) are
+independent presentation dimensions that compose without collision. See
+`renderers/funnel/README.md`'s Transition role styling section. As of
+Phase 15, Explore's Actions/Touchpoints detail (Phase 11) gained a small,
+still fully generic, visual cue: the shared Passport's detail-group item
+contract now accepts an optional `{text, tag}` shape alongside its original
+plain-string shape, letting `explore-detail.mjs` attach a neutral tag — an
+Action's `optional` boolean as "Optional", a Touchpoint's required `type`
+humanized (`web` → "Web", `mobile-app` → "Mobile App", …) — without the
+generic Passport renderer gaining any diagram-type awareness, without a
+Funnel-specific Passport component, and without any new schema field. See
+`renderers/funnel/README.md`'s Explore detail visual semantics section.
+`archify
+render`/`validate` (the `archify` CLI's own dispatch in `bin/archify.mjs`)
+still do not know about `diagram_type: "funnel"` — there is no
+`archify render funnel` command. As of Phase 16, `funnel.schema.json`'s
+`meta` also gained `locale`/`output`/`animation`/`visual_preset`/`views` —
+the same five properties every other diagram type's `meta` already declared
+(the last two via the same shared `common.schema.json#/$defs/animation` and
+`#/$defs/visualPreset` most other diagram schemas already reference, rather
+than duplicating the enum inline) — and shared
+code (`writeDiagram`, `translateMessage`) already read unconditionally. This
+closes a genuine, previously undetected gap (an authored `meta.locale` was
+schema-rejected for Funnel specifically) and lets Funnel author `meta.views`
+to drive the existing, fully generic Guided View/Story player every other
+diagram type already had access to — no new player, no new schema concept,
+just parity. Two more small, generic Passport extensions landed in the same
+phase: a Persona gets a deterministic presentation identity (a hash of its
+id into one of the seven existing brand tokens, consistent across the
+Persona Lens buttons and Explore's Personas group), and Transition `role`
+now also appears in the Stage Passport via the same `{text, tag}` shape
+Phase 15 established. See `renderers/funnel/README.md`'s Persona visual
+identity and Transition role in the Stage Passport sections.
+
+Funnel and Architecture also gained their first relationship: **Cross-Link**
+(`schemas/cross-link.schema.json`) is a separate artifact linking a Funnel
+Stage to an Architecture component at a given HLD/LLD level — never embedded
+in either document, so both remain independently valid whether or not any
+Cross-Link document exists. See "Cross-Link" below and
+`renderers/funnel/README.md`'s Cross-Link section for the full model,
+validation, and the one explicitly deferred piece (a live reverse-lookup
+wiring into `render-architecture.mjs`).
+
+## Cross-Link
+
+`schemas/cross-link.schema.json` defines a document of `links[]`, each
+naming a Funnel Stage (`{document, stageId}`) and an Architecture component
+at a level (`{document, componentId, level: "hld"|"lld"}`). Neither Funnel
+nor Architecture ever references a Cross-Link document or the other domain
+directly — `test/cross-link.test.mjs` asserts this invariant by checking
+neither schema's serialized text contains the string `"cross-link"`.
+
+`renderers/shared/cross-link.mjs` holds every pure function: structural
+validation (duplicate link ids), reference validation (a Stage id actually
+exists in the named Funnel document; a component id is actually visible at
+the named level in the named Architecture document — reusing
+`projection/architecture-projection.mjs`'s existing `projectArchitecture()`
+rather than reimplementing HLD/LLD visibility), forward lookup
+(`linksForStage`) and reverse lookup (`linksForComponent`), and a strict
+href allowlist (`safeCrossLinkHref`) limiting any resolved navigation link
+to a relative local `.html` file with an optional `#focus=<id>` fragment —
+reusing the viewer's existing deep-link convention, never a new navigation
+mechanism, and never an absolute URL, `javascript:`, or `data:` scheme.
+
+`renderers/funnel/render-funnel.mjs` integrates this behind an opt-in
+`--cross-link <path.json>` flag: every invocation without it, including
+every existing example/test/golden fixture, is byte-for-byte unaffected.
+The reverse direction (an Architecture component's Passport linking back to
+the customer journeys it supports) is implemented and tested as a pure
+function but deliberately not yet wired into `render-architecture.mjs`'s
+own CLI — that renderer is substantially larger and more heavily depended
+upon than Funnel's, and wiring live rendering into it is left to a future,
+more narrowly scoped phase rather than rushed here.
+
 ## Shared definitions (common.schema.json)
 
-The five diagram schemas reference `common.schema.json#/$defs/...`:
+The six diagram schemas reference `common.schema.json#/$defs/...`:
 
 - `id` — element identifiers, pattern `^[a-zA-Z][a-zA-Z0-9_-]*$`
 - `point` — an `[x, y]` pair of numbers (used by `via` and `labelAt`)
@@ -264,7 +490,7 @@ stays in `lifecycle.schema.json`.
 
 ## Runtime validation
 
-At development time, `scripts/generate-validators.mjs` compiles all five
+At development time, `scripts/generate-validators.mjs` compiles all six
 schemas with ajv's draft 2020-12 standalone generator using `strict: true` and
 `allErrors: true`. The generated `renderers/shared/generated-validators.mjs`
 is committed and shipped with the skill, so runtime validation has no npm or
@@ -273,7 +499,12 @@ standalone validator before the renderer's own layout checks.
 The shared loader then checks cross-collection facts that JSON Schema cannot
 express cleanly here: duplicate view IDs, duplicate focus IDs, focus IDs that do
 not exist in the diagram's semantic collection, and duplicate authored
-relationship IDs within the mode's relationship collection.
+relationship IDs within the mode's relationship collection. Funnel has no
+renderer or CLI wiring yet, so its equivalent checks
+(`validateFunnelReferences`, plus its `SEMANTIC_COLLECTIONS`/
+`RELATIONSHIP_COLLECTIONS` registrations — see the Funnel section above) are
+exercised directly by `test/funnel-references.test.mjs` rather than through
+`loadDiagram`.
 
 Architecture additionally supports opt-in, revision-pinned repository evidence.
 `meta.repository` names a public GitHub URL and full commit SHA; a component may

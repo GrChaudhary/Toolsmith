@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "diagram_type": "funnel",
+  "meta": {
+    "title": "First purchase",
+    "goal": "A new customer discovers a product and completes checkout",
+    "views": [
+      {
+        "id": "journey",
+        "label": "The journey",
+        "focus": ["discovery", "browse", "checkout", "confirmed"],
+        "note": "From first search to a confirmed order."
+      },
+      {
+        "id": "outcomes",
+        "label": "Where it ends",
+        "focus": ["browse", "confirmed"],
+        "note": "One dropoff point, one conversion."
+      }
+    ]
+  },
+  "personas": [
+    { "id": "newCustomer", "label": "New Customer" },
+    { "id": "returningCustomer", "label": "Returning Customer" }
+  ],
+  "stages": [
+    { "id": "discovery", "label": "Discovery", "personas": ["newCustomer"] },
+    { "id": "browse", "label": "Browse Products", "outcome": "dropoff" },
+    {
+      "id": "checkout",
+      "label": "Checkout",
+      "decision": "Continue to checkout?",
+      "friction": "The shipping address form asks for the same details twice"
+    },
+    { "id": "confirmed", "label": "Order Confirmed", "outcome": "conversion" }
+  ],
+  "touchpoints": [
+    { "id": "web", "type": "web", "label": "Storefront website" },
+    { "id": "confirmationEmail", "type": "email", "label": "Order confirmation email" }
+  ],
+  "actions": [
+    {
+      "id": "search",
+      "stage": "discovery",
+      "label": "Search for a product",
+      "touchpoint": "web"
+    },
+    {
+      "id": "compare",
+      "stage": "browse",
+      "label": "Compare a few options",
+      "touchpoint": "web",
+      "optional": true
+    },
+    {
+      "id": "fillAddress",
+      "stage": "checkout",
+      "label": "Fill in the shipping address",
+      "touchpoint": "web",
+      "friction": "Repeated validation errors on the postal code field"
+    },
+    {
+      "id": "pay",
+      "stage": "checkout",
+      "label": "Enter payment details",
+      "touchpoint": "web"
+    },
+    {
+      "id": "receiveConfirmation",
+      "stage": "confirmed",
+      "label": "Receive order confirmation",
+      "touchpoint": "confirmationEmail",
+      "optional": true,
+      "description": "Sent automatically once payment is captured"
+    }
+  ],
+  "transitions": [
+    { "id": "discoveryToBrowse", "from": "discovery", "to": "browse", "role": "primary" },
+    {
+      "id": "browseToCheckout",
+      "from": "browse",
+      "to": "checkout",
+      "role": "primary",
+      "label": "Chose to continue"
+    },
+    {
+      "id": "checkoutBackToBrowse",
+      "from": "checkout",
+      "to": "browse",
+      "role": "loop",
+      "label": "Went back to compare options"
+    },
+    {
+      "id": "checkoutToConfirmed",
+      "from": "checkout",
+      "to": "confirmed",
+      "role": "primary",
+      "label": "Completed payment"
+    }
+  ]
+}

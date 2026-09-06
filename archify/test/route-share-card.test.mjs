@@ -139,7 +139,7 @@ test('Route Share Card reuses one 1200x630 variant seam and publishes a truthful
   assert.match(html, /var ctx = canvas2dOrThrow\(canvas, viewerText\('viewer\.export\.shareCard'\)\)/);
 });
 
-test('skill and READMEs describe the optional Export variant and show one real card without changing the hero', () => {
+test('skill and README describe the optional Export variant and show one real card without changing the hero', () => {
   const viewer = fs.readFileSync(path.join(skillRoot, 'references', 'viewer-runtime.md'), 'utf8');
   assert.match(viewer, /Export → Route Share Card/);
   assert.match(viewer, /format=share-card/);
@@ -147,7 +147,9 @@ test('skill and READMEs describe the optional Export variant and show one real c
   assert.match(viewer, /data-share-route-\*/);
   assert.match(viewer, /download-only/i);
 
-  for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
+  // README_EN.md/README_ZH.md were deliberately removed; README.md is the
+  // single canonical README.
+  for (const readme of ['README.md']) {
     const text = fs.readFileSync(path.join(repoRoot, readme), 'utf8');
     assert.match(text, /Export → Route Share Card/, readme);
     assert.match(text, /docs\/assets\/archify-route-share-card\.png/, readme);

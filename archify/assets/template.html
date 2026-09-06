@@ -348,6 +348,83 @@
       --toolbar-menu-bg: #fbf8f1;
     }
 
+    /* ==========================================================
+       CONTRAST — a minimal, high-contrast preset. Same semantic
+       hue-per-role palette as every other preset, but stark
+       near-black/near-white surfaces, solid rather than translucent
+       fills, and a single bright accent, for review contexts that
+       need maximum legibility over decorative tone.
+       ========================================================== */
+    [data-preset="contrast"][data-theme="dark"] {
+      --bg: #000000;
+      --grid: #262626;
+      --panel: rgba(0, 0, 0, 0.94);
+      --panel-border: #ffffff;
+      --lane-fill: rgba(255, 255, 255, 0.06);
+      --lane-stroke: #ffffff;
+      --text: #ffffff;
+      --text-muted: #d4d4d4;
+      --text-dim: #8a8a8a;
+      --text-faint: #a6a6a6;
+      --mask: #000000;
+      --frontend-fill: rgba(102, 224, 255, 0.12);
+      --frontend-stroke: #66e0ff;
+      --backend-fill: rgba(124, 255, 178, 0.12);
+      --backend-stroke: #7cffb2;
+      --database-fill: rgba(217, 179, 255, 0.14);
+      --database-stroke: #d9b3ff;
+      --cloud-fill: rgba(255, 209, 102, 0.14);
+      --cloud-stroke: #ffd166;
+      --security-fill: rgba(255, 128, 128, 0.14);
+      --security-stroke: #ff8080;
+      --messagebus-fill: rgba(255, 179, 102, 0.14);
+      --messagebus-stroke: #ffb366;
+      --external-fill: rgba(217, 217, 217, 0.14);
+      --external-stroke: #d9d9d9;
+      --arrow: #ffffff;
+      --arrow-emphasis: #ffe066;
+      --toolbar-bg: rgba(0, 0, 0, 0.94);
+      --toolbar-border: #ffffff;
+      --toolbar-text: #ffffff;
+      --toolbar-hover: #1a1a1a;
+      --toolbar-menu-bg: #000000;
+    }
+
+    [data-preset="contrast"][data-theme="light"] {
+      --bg: #ffffff;
+      --grid: #d9d9d9;
+      --panel: #ffffff;
+      --panel-border: #000000;
+      --lane-fill: rgba(0, 0, 0, 0.04);
+      --lane-stroke: #000000;
+      --text: #000000;
+      --text-muted: #333333;
+      --text-dim: #737373;
+      --text-faint: #595959;
+      --mask: #ffffff;
+      --frontend-fill: rgba(0, 102, 128, 0.08);
+      --frontend-stroke: #006680;
+      --backend-fill: rgba(10, 138, 74, 0.08);
+      --backend-stroke: #0a8a4a;
+      --database-fill: rgba(90, 61, 153, 0.08);
+      --database-stroke: #5a3d99;
+      --cloud-fill: rgba(161, 92, 0, 0.08);
+      --cloud-stroke: #a15c00;
+      --security-fill: rgba(179, 0, 27, 0.08);
+      --security-stroke: #b3001b;
+      --messagebus-fill: rgba(161, 92, 0, 0.08);
+      --messagebus-stroke: #a15c00;
+      --external-fill: rgba(64, 64, 64, 0.08);
+      --external-stroke: #404040;
+      --arrow: #000000;
+      --arrow-emphasis: #a15c00;
+      --toolbar-bg: #ffffff;
+      --toolbar-border: #000000;
+      --toolbar-text: #000000;
+      --toolbar-hover: #f0f0f0;
+      --toolbar-menu-bg: #ffffff;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -799,6 +876,62 @@
       pointer-events: none;
     }
     html[data-embed="true"][data-preset="editorial"] .diagram-container::after { display: none; }
+
+    /* ==========================================================
+       VISUAL EFFECTS — independently composable with any style ×
+       theme combination via space-separated data-effects tokens
+       (e.g. data-effects="glow grain"). Each effect styles existing
+       structural/semantic classes; none gates on diagram type, and
+       none replaces a preset's own rules (placed after every
+       preset's .diagram-container overrides above so an effect
+       always applies on top of whichever style is active).
+       glow and depth are pure CSS filter/shadow additions with no
+       new markup. grain uses the dedicated .effect-overlay node
+       (see ARCHIFY:SVG_SLOT markup) so it never fights the
+       ::before/::after slots already used by preset/motion CSS.
+       glow duplicates its selector under svg[data-effects] so a
+       standalone exported SVG (svg-rooted, without a surrounding
+       html element) keeps the same emphasis treatment; grain and
+       depth style HTML page
+       chrome only, exactly like existing toolbar/card CSS, and are
+       intentionally absent from SVG export.
+       ========================================================== */
+    html[data-effects~="glow"] .a-emphasis,
+    svg[data-effects~="glow"] .a-emphasis {
+      filter: drop-shadow(0 0 2px var(--arrow-emphasis)) drop-shadow(0 0 6px var(--arrow-emphasis));
+    }
+    html[data-effects~="glow"] .m-emphasis,
+    svg[data-effects~="glow"] .m-emphasis {
+      filter: drop-shadow(0 0 3px var(--arrow-emphasis));
+    }
+
+    html[data-effects~="depth"] .diagram-container {
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.32), 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    html[data-effects~="depth"][data-theme="light"] .diagram-container {
+      box-shadow: 0 32px 64px rgba(15, 23, 42, 0.16), 0 8px 20px rgba(15, 23, 42, 0.1);
+    }
+    html[data-effects~="depth"] .card {
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+    }
+    html[data-effects~="depth"][data-theme="light"] .card {
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    .effect-overlay {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+    html[data-effects~="grain"] .effect-overlay {
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 140px 140px;
+      mix-blend-mode: overlay;
+    }
+
     html[data-motion-capable="true"][data-preset="signal-flow"][data-ambient-motion="running"] .diagram-container::before {
       content: "";
       position: absolute;
@@ -1767,6 +1900,66 @@
     .semantic-passport-meta [hidden] { display: none; }
     html[data-preset="blueprint"] .semantic-passport-meta span,
     html[data-preset="blueprint"] .semantic-passport-meta code { border-radius: 0.1rem; }
+    .semantic-passport-detail-groups {
+      margin-top: 0.52rem;
+      display: grid;
+      gap: 0.42rem;
+    }
+    .semantic-passport-detail-groups[hidden] { display: none; }
+    .semantic-passport-detail-group {
+      padding: 0.42rem 0.5rem;
+      border: 1px solid var(--toolbar-border);
+      border-radius: 0.5rem;
+      background: var(--panel);
+    }
+    html[data-preset="blueprint"] .semantic-passport-detail-group { border-radius: 0.16rem; }
+    .semantic-passport-detail-group h4 {
+      margin: 0 0 0.24rem;
+      font-size: 0.5rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+    }
+    .semantic-passport-detail-group ul {
+      margin: 0;
+      padding-left: 0.9rem;
+      display: grid;
+      gap: 0.16rem;
+      font-size: 0.62rem;
+      color: var(--text-muted);
+    }
+    /* Phase 15: a small, neutral text tag for a generic detail-group item —
+       same pill recipe as .semantic-passport-meta's existing chips, scoped
+       separately since it lives inside a detail-group <li>, not the meta
+       row. Deliberately one neutral color for every use (e.g. Funnel's
+       "Optional" Action marker and a Touchpoint's type): the tag identifies
+       a category, not a severity, so it never borrows a status color. */
+    .semantic-passport-detail-tag {
+      display: inline-block;
+      padding: 0.05rem 0.32rem;
+      border: 1px solid color-mix(in srgb, var(--toolbar-border) 82%, transparent);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--panel) 68%, transparent);
+      color: var(--text-faint);
+      font-size: 0.52rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    html[data-preset="blueprint"] .semantic-passport-detail-tag { border-radius: 0.1rem; }
+    /* Phase 16: a small identity dot for a generic detail-group item — e.g.
+       Funnel's deterministic Persona identity, the same token used by
+       Persona Lens's filter buttons. Decorative only (aria-hidden); the
+       item's text remains the sole accessible identifier. */
+    .semantic-passport-detail-swatch {
+      display: inline-block;
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 999px;
+      margin-right: 0.28rem;
+      vertical-align: middle;
+    }
+    html[data-preset="blueprint"] .semantic-passport-detail-swatch { border-radius: 0.1rem; }
     .semantic-passport-evidence {
       margin-top: 0.52rem;
       padding: 0.5rem;
@@ -2546,6 +2739,25 @@
       text-transform: uppercase;
     }
     .guided-story-caption-next strong { color: var(--text-muted); font-weight: 700; }
+    .guided-story-caption-links {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      padding-top: 0.16rem;
+      border-top: 1px solid color-mix(in srgb, var(--frontend-stroke) 22%, var(--toolbar-border));
+    }
+    .guided-story-caption-links[hidden] { display: none; }
+    .guided-story-caption-link {
+      color: var(--frontend-stroke);
+      font-size: 0.5625rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .guided-story-caption-link::before { content: "\2192\00A0"; }
+    .guided-story-caption-link:hover,
+    .guided-story-caption-link:focus-visible { text-decoration: underline; }
     html[data-preset="blueprint"] .guided-story-caption { border-radius: 0.2rem; }
     .guided-views[data-story-beat] .guided-view-copy > #guided-view-label,
     .guided-views[data-story-beat] .guided-view-copy > #guided-view-note { display: none; }
@@ -3316,6 +3528,26 @@
       height: 0.38rem;
       background: #c9502d;
       transform: rotate(45deg);
+    }
+    .preset-option-swatch.contrast {
+      border-color: #ffffff;
+      border-radius: 0.08rem;
+      background: #000000;
+    }
+    .preset-option-swatch.contrast::before {
+      top: 0.32rem;
+      right: 0.32rem;
+      bottom: 0.32rem;
+      left: 0.32rem;
+      border: 1px solid #ffffff;
+    }
+    .preset-option-swatch.contrast::after {
+      top: calc(50% - 0.11rem);
+      right: 0.24rem;
+      width: 0.22rem;
+      height: 0.22rem;
+      border-radius: 50%;
+      background: #ffe066;
     }
     .preset-option-copy { min-width: 0; }
     .preset-option-copy strong,
@@ -4894,6 +5126,11 @@
           <span class="preset-option-copy"><strong>{{i18n:viewer.preset.editorial}}</strong><small>{{i18n:viewer.preset.editorial.hint}}</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
+        <button class="preset-option" data-preset-value="contrast" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
+          <span class="preset-option-swatch contrast" aria-hidden="true"></span>
+          <span class="preset-option-copy"><strong>{{i18n:viewer.preset.contrast}}</strong><small>{{i18n:viewer.preset.contrast.hint}}</small></span>
+          <span class="preset-option-check" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
     <button id="btn-motion" type="button" hidden
@@ -4983,6 +5220,7 @@
             <small>{{i18n:viewer.guided.nextBeat}}</small>
             <strong id="guided-story-caption-next-label"></strong>
           </span>
+          <div class="guided-story-caption-links" id="guided-story-caption-links" hidden role="group" aria-label="{{i18n:viewer.guided.caption.related}}"></div>
         </div>
       </div>
       <button id="guided-view-next" type="button" aria-label="{{i18n:viewer.guided.next}}" title="{{i18n:viewer.guided.next.title}}">&#8594;</button>
@@ -5153,6 +5391,7 @@
         <text x="742" y="186" class="t-muted" font-size="8">Security Group</text>
       </svg>
       <!-- ARCHIFY:SVG_SLOT_END -->
+      <div class="effect-overlay" aria-hidden="true"></div>
       <p class="intent-trace-status no-print" id="intent-trace-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <div class="share-chapter-cue no-print" id="share-chapter-cue" hidden role="status" aria-live="polite">
         <div class="share-chapter-index">
@@ -5239,6 +5478,7 @@
               <span id="focus-brand" data-passport="brand" hidden></span>
               <code id="focus-id" data-passport="id"></code>
             </div>
+            <div class="semantic-passport-detail-groups" id="focus-detail-groups" hidden aria-label="{{i18n:viewer.passport.detailGroups}}"></div>
             <div class="semantic-passport-evidence" id="focus-evidence" hidden aria-label="{{i18n:viewer.passport.evidence}}">
               <div class="semantic-passport-evidence-head">
                 <span class="semantic-passport-evidence-status">{{i18n:viewer.passport.verified}}</span>
@@ -5443,12 +5683,13 @@
        URL, or a later diagram's authored default.
        ============================================================ */
     Archify.preset = (function () {
-      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
+      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'contrast'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
         'signal-flow': viewerText('viewer.preset.flow.short'),
         blueprint: viewerText('viewer.preset.blueprint'),
-        editorial: viewerText('viewer.preset.editorial')
+        editorial: viewerText('viewer.preset.editorial'),
+        contrast: viewerText('viewer.preset.contrast')
       };
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');
@@ -5959,6 +6200,10 @@
           el.removeAttribute('data-lens-selected');
           el.removeAttribute('data-lens-peer');
         });
+        clone.removeAttribute('data-persona-active');
+        Array.prototype.forEach.call(clone.querySelectorAll('[data-persona-match]'), function (el) {
+          el.removeAttribute('data-persona-match');
+        });
         Array.prototype.forEach.call(clone.querySelectorAll('[data-legend-preview-match], [data-legend-preview-selected], [data-legend-preview-peer]'), function (el) {
           el.removeAttribute('data-legend-preview-match');
           el.removeAttribute('data-legend-preview-selected');
@@ -6009,6 +6254,7 @@
           !clone.hasAttribute('data-lens-active') &&
           !clone.hasAttribute('data-lens-flow-count') &&
           !clone.hasAttribute('data-lens-flow-density') &&
+          !clone.hasAttribute('data-persona-active') &&
           !clone.hasAttribute('data-legend-preview-active') &&
           !clone.hasAttribute('data-relationship-preview-active') &&
           !clone.hasAttribute('data-relationship-direct-active') &&
@@ -6028,7 +6274,7 @@
           !clone.hasAttribute('data-chapter-preview') &&
           !clone.style.getPropertyValue('transform') &&
           !clone.style.getPropertyValue('clip-path') &&
-          clone.querySelectorAll('[data-story-overlay], [data-story-carrier-overlay], [data-story-carrier-token], [data-story-step], [data-story-beat-state], [data-story-beat-step], [data-chapter-handoff-overlay], [data-chapter-role], [data-chapter-preview-role], [data-focus-match], [data-focus-selected], [data-reach-match], [data-reach-origin], [data-reach-depth], [data-semantic-lens-overlay], [data-lens-match], [data-lens-selected], [data-lens-peer], [data-legend-bridge], [data-legend-kind], [data-legend-bridge-runtime], [data-legend-count], [data-legend-zero], [data-legend-selected], [data-legend-preview-match], [data-legend-preview-selected], [data-legend-preview-peer], [data-relationship-hit-overlay], [data-relationship-pulse-overlay], [data-relationship-preview], [data-relationship-preview-node], [data-relationship-preview-source], [data-relationship-preview-target], [data-intent-trace-overlay], [data-intent-trace-match], [data-intent-trace-selected], [data-route-probe-overlay], [data-route-journey-overlay], [data-route-match], [data-route-start], [data-route-end], [data-route-step], [data-route-candidate], [data-route-journey-state], [data-route-journey-current], [data-share-route-match], [data-share-route-step], [data-share-route-start], [data-share-route-end], [data-share-route-middle], [data-share-reach-match], [data-share-reach-origin], [data-share-reach-depth], [data-source-evidence-beacon], [data-source-evidence-count], [data-source-evidence-original-label], [data-detail], [data-detail-anchor]').length === 0;
+          clone.querySelectorAll('[data-story-overlay], [data-story-carrier-overlay], [data-story-carrier-token], [data-story-step], [data-story-beat-state], [data-story-beat-step], [data-chapter-handoff-overlay], [data-chapter-role], [data-chapter-preview-role], [data-focus-match], [data-focus-selected], [data-reach-match], [data-reach-origin], [data-reach-depth], [data-semantic-lens-overlay], [data-lens-match], [data-lens-selected], [data-lens-peer], [data-persona-match], [data-legend-bridge], [data-legend-kind], [data-legend-bridge-runtime], [data-legend-count], [data-legend-zero], [data-legend-selected], [data-legend-preview-match], [data-legend-preview-selected], [data-legend-preview-peer], [data-relationship-hit-overlay], [data-relationship-pulse-overlay], [data-relationship-preview], [data-relationship-preview-node], [data-relationship-preview-source], [data-relationship-preview-target], [data-intent-trace-overlay], [data-intent-trace-match], [data-intent-trace-selected], [data-route-probe-overlay], [data-route-journey-overlay], [data-route-match], [data-route-start], [data-route-end], [data-route-step], [data-route-candidate], [data-route-journey-state], [data-route-journey-current], [data-share-route-match], [data-share-route-step], [data-share-route-start], [data-share-route-end], [data-share-route-middle], [data-share-reach-match], [data-share-reach-origin], [data-share-reach-depth], [data-source-evidence-beacon], [data-source-evidence-count], [data-source-evidence-original-label], [data-detail], [data-detail-anchor]').length === 0;
 
         var vb = svg.viewBox.baseVal;
         var finiteSvgDimensions = Number.isFinite(vb.x) && Number.isFinite(vb.y) &&
@@ -7778,6 +8024,92 @@
         });
         evidence.hidden = false;
       }
+      function renderDetailGroups(node) {
+        var container = document.getElementById('focus-detail-groups');
+        if (!container) return;
+        while (container.firstChild) container.removeChild(container.firstChild);
+        var raw = node.getAttribute('data-node-detail-groups');
+        var groups = [];
+        if (raw) {
+          try {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) groups = parsed;
+          } catch (parseError) {
+            groups = [];
+          }
+        }
+        var rendered = false;
+        groups.forEach(function (group) {
+          var items = Array.isArray(group && group.items) ? group.items.filter(Boolean) : [];
+          if (!items.length) return;
+          var groupEl = document.createElement('div');
+          groupEl.className = 'semantic-passport-detail-group';
+          var heading = document.createElement('h4');
+          heading.textContent = String(group.title || '');
+          groupEl.appendChild(heading);
+          var list = document.createElement('ul');
+          items.forEach(function (item) {
+            var li = document.createElement('li');
+            // Generic item shape (Phase 15): a plain string renders exactly
+            // as before; an optional {text, tag} object additionally
+            // appends a small, neutral text tag — e.g. Funnel's "Optional"
+            // Action marker or a Touchpoint's type. No renderer-specific
+            // knowledge lives here: this only understands the two generic
+            // shapes, never what produced them.
+            if (item && typeof item === 'object' && item.text !== undefined) {
+              // Phase 16: an optional generic `swatch` names one of this
+              // page's own existing CSS custom properties (never arbitrary
+              // CSS) to color a small identity dot before the text — e.g.
+              // Funnel's deterministic Persona identity. Validated against
+              // an allowlist pattern even though every current producer
+              // already restricts itself to this set, as defense in depth
+              // against a future producer forgetting to.
+              if (typeof item.swatch === 'string' && /^--[a-z]+-stroke$/.test(item.swatch)) {
+                var swatchEl = document.createElement('span');
+                swatchEl.className = 'semantic-passport-detail-swatch';
+                swatchEl.setAttribute('aria-hidden', 'true');
+                swatchEl.style.setProperty('background-color', 'var(' + item.swatch + ')');
+                li.appendChild(swatchEl);
+              }
+              // Phase 16 (Cross-Link): an optional generic `href` renders
+              // the text as a link instead of plain text — used for
+              // navigating to a related Architecture component or Funnel
+              // Stage in a sibling rendered file. Re-validated here (never
+              // trusted from the attribute alone) against the same
+              // relative-local-html(+#focus=id)-only pattern
+              // safeCrossLinkHref() enforces server-side, so no scheme,
+              // host, or javascript:/data: URL can ever become a live href
+              // even if a future producer forgot to validate.
+              var safeHref = typeof item.href === 'string'
+                && /^[A-Za-z0-9_][A-Za-z0-9_\-./]*\.html(#focus=[A-Za-z0-9_-]+)?$/.test(item.href)
+                ? item.href
+                : null;
+              if (safeHref) {
+                var linkEl = document.createElement('a');
+                linkEl.setAttribute('href', safeHref);
+                linkEl.textContent = String(item.text);
+                li.appendChild(linkEl);
+              } else {
+                li.appendChild(document.createTextNode(String(item.text)));
+              }
+              if (item.tag) {
+                li.appendChild(document.createTextNode(' '));
+                var tagEl = document.createElement('span');
+                tagEl.className = 'semantic-passport-detail-tag';
+                tagEl.textContent = String(item.tag);
+                li.appendChild(tagEl);
+              }
+            } else {
+              li.textContent = String(item);
+            }
+            list.appendChild(li);
+          });
+          groupEl.appendChild(list);
+          container.appendChild(groupEl);
+          rendered = true;
+        });
+        container.hidden = !rendered;
+      }
       function renderPassport(id, node) {
         setPassportValue(detail, node.getAttribute('data-node-sublabel'));
         setPassportValue(kind, viewerKindLabel(node.getAttribute('data-node-kind') || 'node'));
@@ -7786,6 +8118,7 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
+        renderDetailGroups(node);
         renderSourceEvidence(id);
       }
       function relationshipsFor(id, byId) {
@@ -9082,6 +9415,7 @@
       var storyCaptionDetail = document.getElementById('guided-story-caption-detail');
       var storyCaptionNext = document.getElementById('guided-story-caption-next');
       var storyCaptionNextLabel = document.getElementById('guided-story-caption-next-label');
+      var storyCaptionLinks = document.getElementById('guided-story-caption-links');
       var chapterIndex = document.getElementById('guided-view-index');
       var chapterList = document.getElementById('guided-view-chapters');
       var shareCue = document.getElementById('share-chapter-cue');
@@ -9735,8 +10069,44 @@
             return value && values.indexOf(value) === edgeIndex;
           }),
           responsibility: node ? (node.getAttribute('data-node-sublabel') || '') : '',
-          context: node ? (node.getAttribute('data-node-context') || '') : ''
+          context: node ? (node.getAttribute('data-node-context') || '') : '',
+          // Part 2 (Workstream B): generic — any href-bearing detail-group
+          // item this node already carries (today, only Cross-Link produces
+          // one) surfaces here as an optional caption action, e.g. "explore
+          // the supporting Architecture" for a Funnel Stage. This file has
+          // no Funnel- or Cross-Link-specific knowledge: it only understands
+          // the existing generic {title, items:[{text, tag, href}]} shape
+          // renderDetailGroups() already reads from data-node-detail-groups,
+          // so it degrades to an empty list for every diagram/document that
+          // does not use that shape, unchanged.
+          links: storyStepLinks(node)
         };
+      }
+
+      function storyStepLinks(node) {
+        if (!node) return [];
+        var raw = node.getAttribute('data-node-detail-groups');
+        if (!raw) return [];
+        var groups;
+        try {
+          var parsed = JSON.parse(raw);
+          groups = Array.isArray(parsed) ? parsed : [];
+        } catch (parseError) {
+          return [];
+        }
+        var links = [];
+        groups.forEach(function (group) {
+          var items = Array.isArray(group && group.items) ? group.items : [];
+          items.forEach(function (item) {
+            if (!item || typeof item !== 'object' || typeof item.href !== 'string') return;
+            // Same relative-local-html(+#focus=id)-only pattern enforced
+            // server-side and by renderDetailGroups() — re-validated here,
+            // never trusted from the attribute alone.
+            if (!/^[A-Za-z0-9_][A-Za-z0-9_\-./]*\.html(#focus=[A-Za-z0-9_-]+)?$/.test(item.href)) return;
+            links.push({ groupTitle: String(group.title || ''), text: String(item.text || ''), tag: item.tag ? String(item.tag) : '', href: item.href });
+          });
+        });
+        return links;
       }
 
       function storyBeatCopy(step, total) {
@@ -9781,6 +10151,21 @@
         return facts.join(' · ');
       }
 
+      function renderStoryCaptionLinks(step) {
+        if (!storyCaptionLinks) return;
+        while (storyCaptionLinks.firstChild) storyCaptionLinks.removeChild(storyCaptionLinks.firstChild);
+        var links = (step && step.links) || [];
+        if (!links.length) { storyCaptionLinks.hidden = true; return; }
+        links.forEach(function (link) {
+          var a = document.createElement('a');
+          a.setAttribute('href', link.href);
+          a.className = 'guided-story-caption-link';
+          a.textContent = link.groupTitle || link.text;
+          storyCaptionLinks.appendChild(a);
+        });
+        storyCaptionLinks.hidden = false;
+      }
+
       function renderStoryCaption(step, total, nextStep) {
         if (!storyCaption) return;
         if (!step) {
@@ -9788,6 +10173,7 @@
           storyCaption.removeAttribute('data-story-caption');
           storyCaptionNext.hidden = true;
           storyCaptionNextLabel.textContent = '';
+          renderStoryCaptionLinks(null);
           return;
         }
         storyCaption.hidden = false;
@@ -9800,6 +10186,7 @@
         storyCaptionNextLabel.textContent = nextStep
           ? ((nextStep.index + 1 < 10 ? '0' : '') + (nextStep.index + 1) + ' · ' + nextStep.nodeLabel)
           : '';
+        renderStoryCaptionLinks(step);
         storyCaption.style.animation = 'none';
         void storyCaption.offsetWidth;
         storyCaption.style.removeProperty('animation');

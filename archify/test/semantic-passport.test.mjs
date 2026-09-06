@@ -96,4 +96,64 @@ test('Node Finder searches and presents the same passport facts', () => {
   assert.match(html, /meta\.title = \[viewerKindLabel\(item\.type\), item\.id, item\.context, item\.sublabel, item\.tag\]\.filter\(Boolean\)\.join\(' \\u00b7 '\)/);
 });
 
+// ---------------------------------------------------------------------------
+// Phase 11: the Semantic Passport gained a generic, optional detail-groups
+// section (assets/template.html: #focus-detail-groups + renderDetailGroups(),
+// keyed off an optional data-node-detail-groups JSON attribute). It is
+// additive — no renderer other than Funnel currently emits that attribute —
+// so the five existing renderers' own node markup must be byte-for-byte
+// unaffected, while the shared template markup/JS/CSS gains the new,
+// dormant-by-default container once, for every diagram type.
+
+test('the shared template exposes the generic detail-groups Passport container and renderer for every diagram type', () => {
+  for (const [mode, example] of Object.entries(CASES)) {
+    const html = render(mode, example);
+    assert.match(html, /id="focus-detail-groups"/, mode);
+    assert.match(html, /function renderDetailGroups\(node\)/, mode);
+  }
+});
+
+test('none of the five existing renderers emit data-node-detail-groups on their own nodes', () => {
+  for (const [mode, example] of Object.entries(CASES)) {
+    const diagram = svg(render(mode, example));
+    assert.doesNotMatch(diagram, /data-node-detail-groups/, mode);
+  }
+});
+
+test('Funnel is the renderer that actually populates data-node-detail-groups', () => {
+  const output = path.join(tmp, 'funnel.html');
+  execFileSync(process.execPath, [
+    path.join(skillRoot, 'renderers/funnel/render-funnel.mjs'),
+    path.join(skillRoot, 'examples/first-purchase.funnel.json'),
+    output,
+  ]);
+  const html = fs.readFileSync(output, 'utf8');
+  assert.match(html, /id="focus-detail-groups"/);
+  assert.match(svg(html), /data-node-detail-groups="\[/);
+});
+
+// ---------------------------------------------------------------------------
+// Phase 15: renderDetailGroups() gained a second, still fully generic, item
+// shape — a plain string (unchanged) or an optional {text, tag} object — so
+// a renderer can attach a small neutral tag (e.g. Funnel's "Optional" Action
+// marker or a Touchpoint's type) without either Passport knowing what
+// produced the data or a second Passport implementation existing.
+
+test('renderDetailGroups supports a generic {text, tag} item shape via safe DOM construction, with no per-diagram-type branching', () => {
+  const html = render('architecture', CASES.architecture);
+  assert.match(html, /typeof item === 'object' && item\.text !== undefined/);
+  assert.match(html, /tagEl\.className = 'semantic-passport-detail-tag'/);
+  assert.match(html, /tagEl\.textContent = String\(item\.tag\)/);
+  assert.doesNotMatch(html, /diagramType === .funnel./);
+  assert.doesNotMatch(html, /diagram_type === .funnel./);
+});
+
+test('the generic detail-tag CSS is present for every diagram type but only Funnel ever populates a tag', () => {
+  for (const [mode, example] of Object.entries(CASES)) {
+    const html = render(mode, example);
+    assert.match(html, /\.semantic-passport-detail-tag \{/, mode);
+    assert.doesNotMatch(svg(render(mode, example)), /"tag":/, mode);
+  }
+});
+
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
