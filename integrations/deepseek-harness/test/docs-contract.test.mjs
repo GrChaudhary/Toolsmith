@@ -18,36 +18,38 @@ test('DSH 0.1.0 documentation keeps its released Skill snapshot immutable', () =
   assert.match(integration, /update notifier[\s\S]*intentionally excluded/);
 });
 
-test('README docs cover install, invoke, uninstall, community wording, and Produced Files', () => {
-  // README_EN.md/README_ZH.md were deliberately removed; README.md is the
-  // single canonical, English-only README.
-  const english = [read('README.md'), read('integrations/deepseek-harness/README.md')].join('\n');
+test('DSH integration docs cover install, invoke, uninstall, community wording, and Produced Files', () => {
+  // README.md was deliberately reframed to describe this fork as its own
+  // standalone repository and no longer advertises the tt-a1i-scoped DSH
+  // package at all (see the root installation table) — that content now
+  // lives solely in the DSH integration's own README.
+  const integration = read('integrations/deepseek-harness/README.md');
 
-  for (const source of [english, read('README.md')]) {
-    assert.match(source, /@tt-a1i\/archify-dsh@0\.1\.0/);
-    assert.match(source, /@deepseek-ai\/dsh@0\.1\.0-rc\.6/);
-    assert.match(source.replaceAll('\\|', '|'), /\^22\.19\.0 \|\| >=24\.0\.0/);
-    assert.match(source, /dsh plugin --profile web add @tt-a1i\/archify-dsh@0\.1\.0/);
-    assert.match(source, /dsh plugin --profile web remove @tt-a1i\/archify-dsh/);
-    assert.match(source, /Use the archify skill to map this repository's runtime architecture/);
-    assert.doesNotMatch(source, /dsh plugin[^\n]*github:tt-a1i\/archify/);
-    assert.doesNotMatch(source, /allowBuilds:\s*true/);
-    assert.doesNotMatch(source, /npm install github:/);
-  }
+  assert.match(integration, /@tt-a1i\/archify-dsh@0\.1\.0/);
+  assert.match(integration, /@deepseek-ai\/dsh@0\.1\.0-rc\.6/);
+  assert.match(integration.replaceAll('\\|', '|'), /\^22\.19\.0 \|\| >=24\.0\.0/);
+  assert.match(integration, /dsh plugin --profile web add @tt-a1i\/archify-dsh@0\.1\.0/);
+  assert.match(integration, /dsh plugin --profile web remove @tt-a1i\/archify-dsh/);
+  assert.match(integration, /Use the archify skill to map this repository's runtime architecture/);
+  assert.doesNotMatch(integration, /dsh plugin[^\n]*github:tt-a1i\/archify/);
+  assert.doesNotMatch(integration, /allowBuilds:\s*true/);
+  assert.doesNotMatch(integration, /npm install github:/);
 
-  assert.match(english, /community integration/i);
-  assert.match(english, /developer-preview/i);
-  assert.match(english, /not an official DeepSeek/i);
-  assert.match(english, /Produced Files/i);
-  assert.match(english, /exact workspace paths/);
-  assert.match(english, /no telemetry/i);
+  assert.match(integration, /community[\s\S]{0,20}integration/i);
+  assert.match(integration, /developer-preview/i);
+  assert.match(integration, /not\*{0,2} an official DeepSeek/i);
+  assert.match(integration, /Produced Files/i);
+  assert.match(integration, /exact workspace paths/);
+  assert.match(integration, /no telemetry/i);
 });
 
-test('Skills CLI, Cursor, Codex, Claude Code, OpenCode, and Raven remain the default main path', () => {
+test('README documents the standalone clone install and keeps Quick start as the default main path', () => {
+  // Cursor, Codex, Claude Code, and OpenCode installs are documented via the
+  // "Installation options" table rather than a single npx command now that
+  // the README describes cloning this fork directly.
   const english = read('README.md');
-  assert.match(english, /^```bash\nnpx skills add tt-a1i\/archify -g\n```$/m);
+  assert.match(english, /^```bash\ngit clone https:\/\/github\.com\/GrChaudhary\/Toolsmith\.git\n```$/m);
   assert.match(english, /## Quick start/);
-  const dshEnglishIndex = english.indexOf('DeepSeek Harness');
-  const quickStartIndex = english.indexOf('## Quick start');
-  assert.ok(dshEnglishIndex > quickStartIndex, 'DSH docs must not precede the default quick start');
+  assert.match(english, /## Installation options/);
+  assert.doesNotMatch(english, /DeepSeek Harness/, 'the root README should no longer advertise the tt-a1i-scoped DSH package');
 });
